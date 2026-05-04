@@ -1,0 +1,2496 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>AI 공간 디렉터 — 단어가 공간을 만든다</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,300..900,0..100,0..1&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="deck-stage.js"></script>
+<style>
+  :root{
+    --ink: #1a1a1a;
+    --ink-2: #2b2b2b;
+    --paper: #f4efe8;
+    --paper-2: #ebe4d8;
+    --paper-3: #e0d6c4;
+    --line: #1a1a1a;
+    --muted: #8a8275;
+    --accent: #c8462c;       /* terracotta */
+    --accent-2: #2d4a3e;     /* deep sage */
+    --accent-3: #d4a574;     /* oak */
+    --serif: "Fraunces", "Noto Serif KR", ui-serif, Georgia, serif;
+    --sans: "Pretendard", "Pretendard Variable", -apple-system, BlinkMacSystemFont, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, monospace;
+  }
+
+  html, body{ margin:0; padding:0; background:#0a0a0a; }
+  body{ font-family: var(--sans); color: var(--ink); }
+  *{ box-sizing: border-box; }
+
+  deck-stage{ background:#0a0a0a; }
+
+  section{
+    width:1920px; height:1080px;
+    background: var(--paper);
+    color: var(--ink);
+    position: relative;
+    overflow: hidden;
+    font-family: var(--sans);
+    font-feature-settings: "ss01","ss02";
+  }
+
+  /* ============ shared ============ */
+  .frame{
+    position:absolute; inset: 56px 64px;
+    border: 1px solid var(--line);
+    pointer-events:none;
+  }
+  .meta{
+    position:absolute; left:96px; right:96px; top:88px;
+    display:flex; justify-content: space-between; align-items: baseline;
+    font-family: var(--mono);
+    font-size: 16px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--ink);
+  }
+  .meta .l, .meta .r{ display:flex; gap:28px; }
+  .meta .dot{ width:8px; height:8px; background: var(--accent); border-radius:50%; display:inline-block; transform: translateY(-2px); margin-right:10px; }
+
+  .footer{
+    position:absolute; left:96px; right:96px; bottom:88px;
+    display:flex; justify-content: space-between; align-items: baseline;
+    font-family: var(--mono);
+    font-size: 14px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--muted);
+  }
+  .footer .pageno{ font-family: var(--serif); font-style: italic; font-size:18px; letter-spacing:0; text-transform:none; color: var(--ink); }
+
+  .kicker{
+    font-family: var(--mono);
+    font-size: 18px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+  .kicker .num{ color: var(--accent); margin-right: 14px; }
+
+  .serif{ font-family: var(--serif); font-weight: 400; font-style: italic; }
+  .ital{ font-style: italic; }
+
+  h1, h2, h3{ margin:0; font-weight: 500; line-height:1; letter-spacing:-0.02em; }
+
+  .rule{ display:block; height:1px; background: var(--line); width:100%; }
+  .rule-thick{ display:block; height:2px; background: var(--line); width:100%; }
+
+  /* ============ slide 1: title ============ */
+  .s-title{ background: var(--paper); }
+  .s-title .meta .r .badge{ display:flex; align-items:center; gap:8px; }
+  .s-title .body{
+    position:absolute; left:96px; right:96px; top:200px;
+  }
+  .s-title .eyebrow{
+    font-family: var(--mono); font-size: 18px; letter-spacing: 0.24em; text-transform: uppercase;
+    color: var(--ink);
+    display:flex; align-items:center; gap:18px;
+  }
+  .s-title .eyebrow::before{ content:""; display:block; width:64px; height:1px; background: var(--ink); }
+  .s-title h1{
+    font-family: var(--serif);
+    font-weight: 300;
+    font-size: 240px;
+    line-height: 0.92;
+    letter-spacing: -0.04em;
+    margin-top: 28px;
+  }
+  .s-title h1 .ital{ font-style: italic; font-weight:300; color: var(--accent); }
+  .s-title .sub{
+    margin-top: 40px;
+    font-family: var(--serif); font-style: italic; font-weight: 300;
+    font-size: 72px; line-height:1;
+    color: var(--ink-2);
+    letter-spacing:-0.02em;
+  }
+  .s-title .sub .em{ color: var(--accent); }
+  .s-title .credits{
+    position:absolute; left:96px; right:96px; bottom:170px;
+    display:flex; justify-content: space-between; align-items: flex-end;
+    border-top: 1px solid var(--ink);
+    padding-top: 24px;
+  }
+  .s-title .credits .col{ font-family: var(--mono); font-size: 14px; letter-spacing: 0.12em; text-transform: uppercase; }
+  .s-title .credits .col .label{ color: var(--muted); display:block; margin-bottom:8px; }
+  .s-title .credits .col .val{ color: var(--ink); font-size: 18px; letter-spacing: 0.06em; }
+
+  /* big issue mark */
+  .issue-mark{
+    position:absolute; right:96px; top:200px;
+    width: 320px;
+    text-align:right;
+  }
+  .issue-mark .nm{
+    font-family: var(--serif); font-style: italic; font-weight:300;
+    font-size: 140px; line-height:1; color: var(--accent);
+  }
+  .issue-mark .lbl{
+    font-family: var(--mono); font-size:14px; letter-spacing: 0.18em; text-transform:uppercase;
+    color: var(--ink); margin-top: 10px;
+  }
+
+  /* ============ part-divider ============ */
+  .s-part{ background: var(--ink); color: var(--paper); }
+  .s-part .frame{ border-color: var(--paper); }
+  .s-part .meta, .s-part .footer{ color: var(--paper); }
+  .s-part .footer .pageno{ color: var(--paper); }
+  .s-part .footer{ color: rgba(244,239,232,.5); }
+  .s-part .body{
+    position:absolute; left:96px; right:96px; top:50%; transform: translateY(-50%);
+  }
+  .s-part .partno{
+    font-family: var(--serif); font-style: italic; font-weight:300;
+    font-size: 200px; line-height:1; color: var(--accent-3);
+  }
+  .s-part h2{
+    font-family: var(--serif); font-weight:300;
+    font-size: 180px; line-height:0.95;
+    margin-top: 24px;
+    color: var(--paper);
+  }
+  .s-part h2 .ital{ color: var(--accent); }
+  .s-part .lede{
+    margin-top: 48px;
+    font-size: 32px; line-height:1.4; max-width: 1100px;
+    color: rgba(244,239,232,0.75);
+    font-weight: 300;
+  }
+  .s-part .legend{
+    position:absolute; right:96px; bottom: 200px;
+    font-family: var(--mono); font-size: 14px;
+    letter-spacing: 0.12em; text-transform:uppercase;
+    color: rgba(244,239,232,.6);
+    text-align:right;
+  }
+  .s-part .legend .time{ font-family: var(--serif); font-style:italic; font-size: 32px; letter-spacing:0; text-transform:none; color: var(--paper); display:block; margin-top:8px; }
+
+  /* ============ slide 2: opening question ============ */
+  .s-q .body{
+    position:absolute; left:96px; right:96px; top: 200px; bottom: 320px;
+  }
+  .s-q h2{
+    font-family: var(--serif); font-weight:300;
+    font-size: 96px; line-height: 1.1;
+    letter-spacing: -0.025em;
+    max-width: 1700px;
+  }
+  .s-q h2 .em{ color: var(--accent); font-style: italic; }
+  .s-q h2 .underline{ text-decoration: underline; text-underline-offset: 18px; text-decoration-thickness: 4px; }
+
+  .answer-row{
+    position:absolute; left:96px; right:96px; bottom: 220px;
+    display:flex; gap: 16px; align-items:center; flex-wrap: wrap;
+  }
+  .answer-row .label{
+    font-family: var(--mono); font-size: 14px; letter-spacing:0.16em; text-transform:uppercase;
+    color: var(--muted); margin-right: 12px;
+  }
+  .chip{
+    font-family: var(--serif); font-style: italic; font-weight:300;
+    font-size: 36px;
+    padding: 14px 28px;
+    border: 1px solid var(--ink);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--ink);
+    cursor: pointer;
+    transition: all .2s ease;
+    user-select:none;
+  }
+  .chip:hover{ background: var(--ink); color: var(--paper); }
+  .chip.live{
+    background: var(--accent); color: var(--paper); border-color: var(--accent);
+    animation: chipIn .3s ease;
+  }
+  @keyframes chipIn{ from{ transform: scale(0.6); opacity:0; } to{ transform: scale(1); opacity:1; }}
+
+  .input-area{
+    position:absolute; left:96px; right:96px; bottom: 96px;
+    display:flex; gap:16px; align-items:center;
+  }
+  .input-area input{
+    flex:0 0 480px;
+    font-family: var(--serif); font-style: italic; font-weight:300;
+    font-size: 32px;
+    padding: 14px 24px;
+    border: 1px solid var(--ink);
+    background: transparent;
+    color: var(--ink);
+    border-radius: 0;
+    outline: none;
+  }
+  .input-area input::placeholder{ color: var(--muted); }
+  .input-area .add{
+    font-family: var(--mono); font-size: 14px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    padding: 16px 28px;
+    background: var(--ink); color: var(--paper);
+    border:none; cursor:pointer;
+  }
+  .input-area .hint{
+    font-family: var(--mono); font-size: 13px; letter-spacing:0.12em; text-transform: uppercase;
+    color: var(--muted); margin-left: 12px;
+  }
+
+  /* ============ slide 3: foreshadow ============ */
+  .s-fore .body{
+    position:absolute; left:96px; right:96px; top:50%; transform: translateY(-50%);
+  }
+  .s-fore .quotemark{
+    font-family: var(--serif); font-style: italic; font-weight:300;
+    font-size: 320px; line-height: 0.6;
+    color: var(--accent);
+    margin-bottom: 0;
+  }
+  .s-fore h2{
+    font-family: var(--serif); font-weight: 300;
+    font-size: 144px; line-height: 1.1;
+    max-width: 1600px;
+    margin-top: -40px;
+  }
+  .s-fore h2 .em{ color: var(--accent); font-style: italic; }
+  .s-fore .attr{
+    margin-top: 48px;
+    font-family: var(--mono); font-size: 16px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* ============ slide 5: existing ============ */
+  .s-existing .body{ position:absolute; left:96px; right:96px; top:160px; bottom: 160px; display:flex; flex-direction:column; }
+  .s-existing h2{
+    font-family: var(--serif); font-weight:300; font-size: 96px; line-height:1;
+    letter-spacing:-0.02em;
+  }
+  .s-existing h2 .em{ font-style:italic; color: var(--accent); }
+  .s-existing .grid{
+    margin-top: 32px;
+    display:grid; grid-template-columns: repeat(3, 1fr); gap: 32px;
+    flex: 1;
+    min-height: 0;
+  }
+  .craft-card{
+    border: 1px solid var(--ink);
+    background: var(--paper-2);
+    position:relative;
+    display:flex; flex-direction:column;
+    overflow:hidden;
+  }
+  .craft-card .ph{
+    flex:1; display:flex; align-items:center; justify-content:center;
+    color: var(--muted);
+    background:
+      repeating-linear-gradient(45deg, transparent 0 18px, rgba(26,26,26,0.04) 18px 19px);
+    border-bottom: 1px solid var(--ink);
+    position:relative;
+  }
+  .craft-card .ph svg{ width: 200px; height: 200px; opacity: 0.55; }
+  .craft-card .cap{
+    padding: 24px 28px;
+    display:flex; flex-direction:column; gap:6px;
+  }
+  .craft-card .cap .num{ font-family: var(--mono); font-size: 13px; letter-spacing:0.18em; color: var(--muted); }
+  .craft-card .cap .ttl{ font-family: var(--serif); font-style: italic; font-weight:300; font-size: 40px; }
+  .craft-card .cap .desc{ font-size: 17px; color: var(--ink-2); margin-top:4px; }
+  .craft-card .clock{
+    position:absolute; top:24px; right:24px;
+    font-family: var(--mono); font-size: 12px; letter-spacing:0.12em;
+    background: var(--ink); color: var(--paper);
+    padding: 6px 12px;
+  }
+
+  /* ============ slide 6/7: before-after ============ */
+  .s-ba .body{ position:absolute; left:96px; right:96px; top: 152px; }
+  .s-ba .topline{ display:flex; justify-content:space-between; align-items: baseline; margin-bottom: 16px; }
+  .s-ba h2{
+    font-family: var(--serif); font-weight:300; font-size: 56px; line-height:1.05;
+    max-width: 1300px; letter-spacing:-0.02em;
+  }
+  .s-ba h2 .em{ font-style:italic; color: var(--accent); }
+  .s-ba .ba-grid{
+    margin-top: 28px;
+    display:grid; grid-template-columns: 1fr 220px 1fr; gap: 28px;
+    align-items: stretch;
+  }
+  .s-ba .pane{
+    aspect-ratio: 4/3;
+    border: 1px solid var(--ink);
+    background: var(--paper-2);
+    position:relative;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .s-ba .pane .pmeta{
+    position:absolute; top:0; left:0; right:0;
+    display:flex; justify-content: space-between; align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--ink);
+    font-family: var(--mono); font-size: 12px; letter-spacing:0.16em; text-transform:uppercase;
+    background: var(--paper);
+  }
+  .s-ba .pane .pmeta .tag{
+    background: var(--ink); color: var(--paper);
+    padding: 4px 10px; letter-spacing: 0.18em;
+  }
+  .s-ba .pane.after .pmeta .tag{ background: var(--accent); }
+  .s-ba .pane .ph-inner{
+    position:absolute; inset:0;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap: 18px;
+    flex-direction:column; gap: 12px;
+    color: var(--muted);
+    font-family: var(--mono); font-size: 14px; letter-spacing: 0.1em; text-transform: uppercase;
+    text-align:center;
+  }
+  .s-ba .pane .ph-inner svg{ width:140px; height:140px; opacity:0.45; }
+  .s-ba .pane .ph-inner > div{ font-family: var(--mono); font-size: 13px; color: var(--muted); letter-spacing: 0.1em; text-align:center; line-height:1.6; }
+  .s-ba .pane .pcap{
+    position:absolute; left:0; right:0; bottom:0;
+    padding: 14px 20px;
+    border-top: 1px solid var(--ink);
+    background: var(--paper);
+    font-family: var(--serif); font-style: italic; font-size: 18px;
+    display:flex; justify-content: space-between; align-items:center;
+    white-space: nowrap;
+  }
+  .s-ba .pane .pcap .right{ font-family: var(--mono); font-style: normal; font-size:13px; letter-spacing:0.14em; text-transform:uppercase; color: var(--muted); }
+  .s-ba .arrow{
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap: 16px;
+  }
+  .s-ba .arrow svg{ width:80px; height:80px; }
+  .s-ba .arrow .lbl{
+    font-family: var(--mono); font-size: 13px; letter-spacing:0.18em; text-transform:uppercase;
+    color: var(--ink); writing-mode: horizontal-tb;
+    text-align:center;
+  }
+  .s-ba .arrow .lbl .big{
+    display:block; font-family: var(--serif); font-style: italic; font-size: 36px; letter-spacing: 0; text-transform:none;
+    color: var(--accent); margin-top:6px;
+  }
+  .s-ba .stat{
+    margin-top: 28px;
+    display:flex; justify-content:space-between; align-items:flex-end;
+    border-top: 1px solid var(--ink); padding-top: 24px;
+  }
+  .s-ba .stat .l{ font-family: var(--mono); font-size: 16px; letter-spacing:0.16em; text-transform:uppercase; color: var(--ink); }
+  .s-ba .stat .r{ font-family: var(--serif); font-style: italic; font-size: 28px; white-space: nowrap; }
+  .s-ba .stat .r .strike{ text-decoration: line-through; color: var(--muted); }
+  .s-ba .stat .r .accent{ color: var(--accent); margin-left: 16px; }
+
+  /* ============ slide 8: replaced? ============ */
+  .s-replace{ background: var(--paper); }
+  .s-replace .body{
+    position:absolute; left:96px; right:96px; top:240px; bottom:160px;
+    display:flex; flex-direction:column; justify-content:center; gap: 60px;
+  }
+  .s-replace .q{
+    font-family: var(--serif); font-weight:300; font-size: 160px; line-height:1;
+    color: var(--muted);
+    text-decoration: line-through;
+    text-decoration-thickness: 6px;
+    text-decoration-color: var(--accent);
+    letter-spacing: -0.02em;
+  }
+  .s-replace .a{
+    font-family: var(--serif); font-weight:300; font-style: italic; font-size: 168px; line-height:1;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+  }
+  .s-replace .a .em{ color: var(--accent); }
+  .s-replace .note{
+    margin-top: 12px;
+    font-size: 28px; max-width: 1100px; color: var(--ink-2); font-weight:300; line-height:1.5;
+  }
+
+  /* ============ slide 9: director ============ */
+  .s-director .body{ position:absolute; left:96px; right:96px; top:200px; bottom:160px; }
+  .s-director .head{ display:flex; justify-content:space-between; align-items: baseline; }
+  .s-director h2{
+    font-family: var(--serif); font-weight:300; font-size: 88px; line-height:1;
+    letter-spacing:-0.02em;
+    white-space: nowrap;
+  }
+  .s-director h2 .em{ font-style:italic; color: var(--accent); }
+  .s-director .compare{
+    margin-top: 80px;
+    display:grid; grid-template-columns: 1fr 1fr; gap: 0;
+    border: 1px solid var(--ink);
+  }
+  .s-director .col{
+    padding: 56px 56px;
+    position:relative;
+  }
+  .s-director .col + .col{ border-left: 1px solid var(--ink); }
+  .s-director .col .role{
+    font-family: var(--mono); font-size: 14px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--muted);
+  }
+  .s-director .col .ttl{
+    font-family: var(--serif); font-weight:300; font-size: 88px; line-height:1; margin-top: 16px;
+  }
+  .s-director .col .ttl .ital{ font-style:italic; color: var(--accent); }
+  .s-director .col .arrow{
+    margin: 32px 0;
+    display:flex; align-items:center; gap:18px;
+    font-family: var(--mono); font-size: 14px; letter-spacing:0.18em; text-transform:uppercase;
+    color: var(--ink);
+  }
+  .s-director .col .arrow svg{ width:48px; height: 12px; }
+  .s-director .col .target{
+    font-family: var(--serif); font-style: italic; font-weight:300; font-size: 56px;
+    color: var(--ink);
+  }
+  .s-director .col .what{
+    margin-top: 24px;
+    font-size: 22px; line-height:1.5; color: var(--ink-2); font-weight: 300;
+  }
+  .s-director .col.b{ background: var(--paper-2); }
+
+  /* ============ slide 10: specific ============ */
+  .s-specific .body{ position:absolute; left:96px; right:96px; top:200px; bottom:160px; }
+  .s-specific h2{
+    font-family: var(--serif); font-weight:300; font-size: 96px; line-height:1; letter-spacing:-0.02em;
+  }
+  .s-specific h2 .em{ font-style:italic; color: var(--accent); }
+  .s-specific .pairs{
+    margin-top: 80px;
+    display:flex; flex-direction:column; gap: 56px;
+  }
+  .s-specific .pair{
+    display:grid; grid-template-columns: 200px 1fr 60px 1fr; gap: 24px; align-items:center;
+  }
+  .s-specific .pair .scene{
+    font-family: var(--mono); font-size: 14px; letter-spacing:0.2em; text-transform:uppercase;
+    color: var(--muted);
+  }
+  .s-specific .pair .scene .num{
+    display:block;
+    font-family: var(--serif); font-style: italic; font-size: 64px; color: var(--accent); letter-spacing:0; text-transform:none; line-height:1;
+    margin-bottom: 6px;
+  }
+  .s-specific .pair .vague{
+    border: 1px dashed var(--muted);
+    padding: 32px 36px;
+    font-family: var(--serif); font-style: italic; font-weight:300; font-size: 44px;
+    color: var(--muted);
+    background: transparent;
+  }
+  .s-specific .pair .vs{
+    font-family: var(--mono); font-size: 14px; letter-spacing:0.2em; text-transform:uppercase;
+    color: var(--ink); text-align:center;
+  }
+  .s-specific .pair .vs::before, .s-specific .pair .vs::after{
+    content:""; display:block; width: 1px; height: 32px; background: var(--ink); margin: 12px auto;
+  }
+  .s-specific .pair .precise{
+    border: 1px solid var(--ink);
+    padding: 32px 36px;
+    background: var(--paper-2);
+    font-family: var(--serif); font-weight:400; font-size: 36px;
+    color: var(--ink);
+    line-height:1.4;
+  }
+  .s-specific .pair .precise .tok{
+    background: var(--ink); color: var(--paper);
+    padding: 4px 14px;
+    margin: 0 4px;
+    font-family: var(--sans); font-size: 22px; font-weight: 500;
+    border-radius: 4px;
+    display:inline-block;
+    vertical-align: middle;
+  }
+
+  /* ============ slide 12: hero claim ============ */
+  .s-hero{ background: var(--ink); color: var(--paper); }
+  .s-hero .frame{ border-color: var(--paper); }
+  .s-hero .meta, .s-hero .footer{ color: var(--paper); }
+  .s-hero .footer{ color: rgba(244,239,232,.5); }
+  .s-hero .body{
+    position:absolute; left:96px; right:96px; top:50%; transform: translateY(-50%);
+  }
+  .s-hero h1{
+    font-family: var(--serif); font-weight:300;
+    font-size: 240px; line-height:0.95;
+    color: var(--paper);
+    letter-spacing: -0.04em;
+  }
+  .s-hero h1 .em{ font-style: italic; color: var(--accent); font-weight:300; }
+  .s-hero h1 .ital{ font-style: italic; }
+  .s-hero .annot{
+    position:absolute; right:96px; bottom: 280px;
+    width: 320px; text-align:right;
+    font-family: var(--mono); font-size: 14px; letter-spacing:0.16em; text-transform:uppercase;
+    color: var(--accent-3);
+    line-height: 1.5;
+  }
+  .s-hero .annot::before{ content:""; display:block; width: 60px; height: 1px; background: var(--accent-3); margin-left:auto; margin-bottom: 12px; }
+  .s-hero .stamp{
+    position:absolute; right:96px; bottom: 200px;
+    font-family: var(--serif); font-style: italic; font-weight:300;
+    font-size: 32px; color: var(--accent-3);
+  }
+
+  /* ============ slide 13: process ============ */
+  .s-process .body{ position:absolute; left:96px; right:96px; top: 180px; bottom: 160px; }
+  .s-process .head{ display:flex; justify-content:space-between; align-items: baseline; }
+  .s-process h2{
+    font-family: var(--serif); font-weight:300; font-size: 64px; line-height:1; letter-spacing:-0.02em; max-width: 900px; white-space: nowrap;
+  }
+  .s-process h2 .em{ font-style:italic; color: var(--accent); }
+  .s-process .legend-row{
+    display:flex; gap: 36px;
+    font-family: var(--mono); font-size: 13px; letter-spacing:0.16em; text-transform:uppercase;
+  }
+  .s-process .legend-row .it{ display:flex; align-items:center; gap:10px; }
+  .s-process .legend-row .sw{ width: 24px; height: 24px; border:1px solid var(--ink); }
+  .s-process .legend-row .sw.you{ background: var(--accent); border-color: var(--accent); }
+  .s-process .legend-row .sw.ai{ background: var(--ink); }
+  .s-process .flow{
+    margin-top: 72px;
+    display:grid; grid-template-columns: repeat(5, 1fr);
+    gap: 0;
+    position:relative;
+  }
+  .s-process .flow .step{
+    text-align:left;
+    padding: 0 28px;
+    position:relative;
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity .5s ease, transform .5s ease;
+  }
+  .s-process .flow .step.pre{ opacity:0; transform: translateY(16px); }
+  .s-process .flow .step.in{ opacity:1; transform: translateY(0); }
+  .s-process .flow .step .num{
+    font-family: var(--serif); font-style: italic; font-weight:300;
+    font-size: 24px; color: var(--muted); margin-bottom: 12px;
+  }
+  .s-process .flow .step .who{
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase;
+    padding: 4px 10px;
+    background: var(--ink); color: var(--paper);
+    display:inline-block;
+    margin-bottom: 24px;
+  }
+  .s-process .flow .step.you .who{ background: var(--accent); }
+  .s-process .flow .step .ttl{
+    font-family: var(--serif); font-weight:300; font-size: 56px; line-height:1.05;
+    margin-bottom: 16px;
+    letter-spacing: -0.02em;
+  }
+  .s-process .flow .step .ttl .ital{ font-style:italic; color: var(--accent); }
+  .s-process .flow .step .desc{ font-size: 17px; color: var(--ink-2); line-height:1.5; font-weight:300; }
+  .s-process .flow .step .ico{
+    width: 64px; height: 64px;
+    border:1px solid var(--ink);
+    background: var(--paper);
+    display:flex; align-items:center; justify-content:center;
+    margin-bottom: 28px;
+  }
+  .s-process .flow .step.you .ico{ background: var(--accent); border-color: var(--accent); color: var(--paper); }
+  .s-process .flow .step .ico svg{ width: 32px; height: 32px; }
+  .s-process .flow .arrows{
+    position:absolute;
+    top: 32px;
+    left: 0; right:0;
+    height: 1px;
+    pointer-events:none;
+  }
+  .s-process .flow .arrows .a{
+    position:absolute;
+    height: 1px;
+    background: var(--ink);
+    top:0;
+    transform-origin: left;
+    transform: scaleX(1);
+    transition: transform .6s ease;
+  }
+  .s-process .flow .arrows .a.pre{ transform: scaleX(0); }
+  .s-process .flow .arrows .a.in{ transform: scaleX(1); }
+  .s-process .flow .arrows .a::after{
+    content:"";
+    position:absolute; right:-2px; top: -4px;
+    width:0; height:0;
+    border-left: 8px solid var(--ink);
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+  }
+
+  .s-process .repeat{
+    margin-top: 80px;
+    display:flex; align-items:center; gap: 24px;
+    font-family: var(--mono); font-size: 14px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--muted);
+  }
+  .s-process .repeat .arc{
+    width: 80px; height: 32px;
+    border: 1px solid var(--muted);
+    border-bottom: none;
+    border-radius: 80px 80px 0 0;
+    display:inline-block;
+  }
+
+  /* ============ slide 15: why opal ============ */
+  .s-why .body{
+    position:absolute; left:96px; right:96px; top: 180px; bottom: 160px;
+    display:flex; flex-direction: column;
+  }
+  .s-why .kicker{
+    font-family: var(--mono); font-size: 12px; letter-spacing:0.18em; text-transform:uppercase;
+    color: var(--ink-2); display:flex; align-items:center; gap: 16px;
+  }
+  .s-why .kicker .num{
+    background: var(--ink); color: var(--paper);
+    padding: 4px 10px; font-size: 11px; letter-spacing: 0.14em;
+  }
+  .s-why h2{
+    margin-top: 32px;
+    font-family: var(--serif); font-weight:300; font-size: 104px; line-height: 1.05;
+    letter-spacing:-0.02em;
+  }
+  .s-why h2 .em{ font-style:italic; color: var(--accent); }
+  .s-why .why-grid{
+    margin-top: 64px;
+    display:grid; grid-template-columns: 1fr 1px 1fr; gap: 60px;
+    align-items: start;
+  }
+  .s-why .why-grid .divider{ background: var(--ink-2); align-self: stretch; opacity: .35; }
+  .s-why .why-grid .col .ttl{
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--ink-2); margin-bottom: 20px;
+    display:inline-flex; align-items:center; gap: 10px;
+  }
+  .s-why .why-grid .col .ttl::before{
+    content:""; display:inline-block; width: 28px; height: 1px; background: var(--ink-2);
+  }
+  .s-why .why-grid .col .desc{
+    font-family: var(--sans); font-weight: 300; font-size: 26px; line-height: 1.5;
+    color: var(--ink);
+  }
+  .s-why .why-grid .col.b .desc .em{ color: var(--accent); font-style: italic; font-family: var(--serif); }
+  .s-why .punch{
+    margin-top: auto; padding-top: 28px;
+    border-top: 1px solid var(--ink);
+    display:flex; align-items: baseline; gap: 28px;
+  }
+  .s-why .punch .lbl{
+    font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--ink-2); white-space: nowrap;
+  }
+  .s-why .punch .txt{
+    font-family: var(--serif); font-style: italic; font-weight: 300;
+    font-size: 32px; line-height: 1.3; color: var(--ink);
+  }
+
+  /* ============ slide 14/15 demo / recap ============ */
+  .s-demo .body{ position:absolute; left:96px; right:96px; top:180px; bottom: 160px; display:flex; flex-direction:column; }
+  .s-demo .head{ display:flex; justify-content:space-between; align-items: baseline; margin-bottom: 32px; }
+  .s-demo h2{
+    font-family: var(--serif); font-weight:300; font-size: 96px; line-height:1; letter-spacing:-0.02em;
+  }
+  .s-demo h2 .em{ font-style:italic; color: var(--accent); }
+  .s-demo .opal{
+    flex:1;
+    border: 1px solid var(--ink);
+    background: var(--paper-2);
+    position:relative;
+    display:flex; align-items:center; justify-content:center;
+    overflow: hidden;
+  }
+  .s-demo .opal .shot{
+    width: 100%; height: 100%; object-fit: contain; object-position: center;
+    background: #000;
+    display: block;
+  }
+  .s-demo .opal .corner{
+    position:absolute; top: 24px; left: 24px; z-index: 2;
+    font-family: var(--mono); font-size: 13px; letter-spacing:0.16em; text-transform:uppercase;
+    background: var(--ink); color: var(--paper); padding: 6px 14px;
+  }
+  .s-demo .opal .ph{
+    text-align:center;
+  }
+  .s-demo .opal .ph .glyph{
+    width: 200px; height: 200px;
+    border: 1px solid var(--ink);
+    margin: 0 auto 24px;
+    display:flex; align-items:center; justify-content:center;
+    background: var(--paper);
+  }
+  .s-demo .opal .ph .glyph svg{ width: 96px; height: 96px; }
+  .s-demo .opal .ph .lbl{
+    font-family: var(--serif); font-style: italic; font-weight: 300; font-size: 40px; color: var(--ink);
+  }
+  .s-demo .opal .ph .sub{
+    font-family: var(--mono); font-size: 13px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--muted); margin-top: 8px;
+  }
+
+  /* recap */
+  .s-recap .body{ position:absolute; left:96px; right:96px; top: 180px; bottom: 160px; display:flex; flex-direction:column; }
+  .s-recap .head{ display:flex; justify-content:space-between; align-items: baseline; margin-bottom: 32px; }
+  .s-recap h2{
+    font-family: var(--serif); font-weight:300; font-size: 56px; line-height:1.15; letter-spacing:-0.02em; white-space: nowrap;
+  }
+  .s-recap h2 .em{ font-style:italic; color: var(--accent); }
+  .s-recap .grid{
+    flex:1;
+    margin-top: 16px;
+    display:grid; grid-template-columns: 1fr 1fr; gap: 32px;
+    min-height: 0;
+  }
+  .s-recap .item{
+    border: 1px solid var(--ink);
+    background: var(--paper-2);
+    display:flex; flex-direction:column;
+    overflow:hidden;
+  }
+  .s-recap .item .img{
+    flex:1;
+    background:
+      repeating-linear-gradient(45deg, transparent 0 22px, rgba(26,26,26,0.04) 22px 23px);
+    display:flex; align-items:center; justify-content:center;
+    position:relative;
+    border-bottom: 1px solid var(--ink);
+  }
+  .s-recap .item .tag{
+    position:absolute; top:24px; left: 24px;
+    font-family: var(--mono); font-size: 12px; letter-spacing:0.18em; text-transform:uppercase;
+    background: var(--ink); color: var(--paper); padding: 6px 12px;
+  }
+  .s-recap .item.b .tag{ background: var(--accent); }
+  .s-recap .item .glyph{ width: 140px; height: 140px; opacity:0.5; }
+  .s-recap .item .cap{
+    padding: 32px 36px;
+  }
+  .s-recap .item .cap .kw{
+    display:flex; flex-wrap:wrap; gap: 8px;
+    margin-bottom: 16px;
+  }
+  .s-recap .item .cap .kw span{
+    font-family: var(--sans); font-size: 18px; font-weight:500;
+    padding: 6px 14px;
+    border: 1px solid var(--ink);
+    border-radius: 999px;
+  }
+  .s-recap .item.b .cap .kw .changed{ background: var(--accent); color: var(--paper); border-color: var(--accent); }
+  .s-recap .item .cap .ttl{ font-family: var(--serif); font-style: italic; font-weight:300; font-size: 36px; }
+
+  .s-recap .punchline{
+    margin-top: 24px;
+    text-align:center;
+    font-family: var(--serif); font-weight:300; font-style: italic; font-size: 48px;
+    color: var(--ink);
+  }
+  .s-recap .punchline .em{ color: var(--accent); }
+
+  /* ============ slide 17: handoff ============ */
+  .s-handoff{ background: var(--paper); }
+  .s-handoff .body{ position:absolute; left:96px; right:96px; top: 160px; bottom: 160px; display:flex; flex-direction:column; }
+  .s-handoff h2{
+    font-family: var(--serif); font-weight:300; font-size: 96px; line-height: 0.95;
+    letter-spacing:-0.02em;
+  }
+  .s-handoff h2 .em{ font-style:italic; color: var(--accent); }
+  .s-handoff .stages{
+    margin-top: 40px;
+    display:grid; grid-template-columns: 1fr 1fr; gap: 32px;
+    flex: 1;
+    min-height: 0;
+    flex:1;
+  }
+  .s-handoff .stage{
+    border: 1px solid var(--ink);
+    padding: 36px 40px;
+    display:flex; flex-direction:column;
+    background: var(--paper-2);
+    position:relative;
+    overflow:hidden;
+  }
+  .s-handoff .stage .num{
+    font-family: var(--serif); font-style: italic; font-weight:300; font-size: 88px; color: var(--accent); line-height:1;
+  }
+  .s-handoff .stage .who{
+    font-family: var(--mono); font-size: 14px; letter-spacing:0.2em; text-transform:uppercase;
+    color: var(--ink); margin-top: 8px;
+  }
+  .s-handoff .stage .ttl{
+    font-family: var(--serif); font-weight:300; font-size: 48px; line-height:1.05;
+    margin-top: 20px; letter-spacing: -0.02em;
+  }
+  .s-handoff .stage .ttl .ital{ font-style:italic; }
+  .s-handoff .stage .desc{
+    margin-top: 20px;
+    font-size: 18px; color: var(--ink-2); line-height:1.5; font-weight:300;
+  }
+  .s-handoff .stage .time{
+    margin-top: auto;
+    border-top: 1px solid var(--ink);
+    padding-top: 16px;
+    font-family: var(--mono); font-size: 14px; letter-spacing:0.16em; text-transform:uppercase;
+    color: var(--ink);
+  }
+  .s-handoff .url{
+    margin-top: 24px;
+    flex: 0 0 auto;
+    border-top: 1px solid var(--ink);
+    padding-top: 32px;
+    display:flex; justify-content: space-between; align-items: center;
+  }
+  .s-handoff .url .lbl{
+    font-family: var(--mono); font-size: 14px; letter-spacing:0.2em; text-transform:uppercase;
+    color: var(--muted);
+  }
+  .s-handoff .url .addr{
+    font-family: var(--mono); font-size: 28px; letter-spacing:0.04em;
+    color: var(--ink);
+    background: var(--paper-2);
+    padding: 12px 24px;
+    border: 1px solid var(--ink);
+  }
+  .s-handoff .url .addr .cursor{
+    display:inline-block; width: 14px; height: 32px; background: var(--accent); margin-left: 8px; vertical-align: middle;
+    animation: blink 1s steps(2, end) infinite;
+  }
+  @keyframes blink{ 50%{ opacity:0; }}
+
+  /* ============ GLOBAL SLIDE ANIMATIONS ============ */
+  /* Items animate when their slide gets .is-active. Default = hidden, in-active = visible. */
+
+  [data-anim]{
+    opacity: 0;
+    transition: opacity .9s ease, transform .9s cubic-bezier(.2,.7,.2,1), filter .9s ease;
+    transition-delay: var(--anim-delay, 0ms);
+    will-change: opacity, transform;
+  }
+  [data-anim="up"]      { transform: translateY(28px); }
+  [data-anim="down"]    { transform: translateY(-22px); }
+  [data-anim="left"]    { transform: translateX(40px); }
+  [data-anim="right"]   { transform: translateX(-40px); }
+  [data-anim="zoom"]    { transform: scale(0.94); }
+  [data-anim="rise"]    { transform: translateY(60px); filter: blur(6px); }
+  [data-anim="fade"]    { /* opacity only */ }
+  [data-anim="reveal"]  { clip-path: inset(0 100% 0 0); opacity: 1; }
+
+  .is-active [data-anim]{
+    opacity: 1;
+    transform: none;
+    filter: none;
+    clip-path: inset(0 0 0 0);
+  }
+
+  /* split-text helper: each .word fades+rises in sequence */
+  .split-words .word{
+    display:inline-block;
+    opacity:0;
+    transform: translateY(0.5em);
+    transition: opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1);
+    transition-delay: calc(var(--word-base, 0ms) + var(--word-i, 0) * 90ms);
+  }
+  .is-active .split-words .word{ opacity:1; transform:none; }
+
+  /* eyebrow letter-spacing pulse on title */
+  .is-active .s-title__eyebrow{ animation: eyebrowSpread 1.6s ease both; }
+  @keyframes eyebrowSpread{
+    from{ letter-spacing: 0.2em; opacity:0; }
+    to{ letter-spacing: 0.5em; opacity:1; }
+  }
+
+  /* shimmer line on dividers */
+  .anim-line{ position:relative; overflow:hidden; }
+  .anim-line::after{
+    content:""; position:absolute; inset:0;
+    background: var(--paper);
+    transform-origin: left;
+    transform: scaleX(1);
+    transition: transform 1.1s cubic-bezier(.8,.1,.2,1) var(--anim-delay, 0ms);
+  }
+  .is-active .anim-line::after{ transform: scaleX(0); }
+
+  /* arrow draw */
+  .anim-arrow path, .anim-arrow line{
+    stroke-dasharray: 200; stroke-dashoffset: 200;
+    transition: stroke-dashoffset 1.2s ease var(--anim-delay, 200ms);
+  }
+  .is-active .anim-arrow path, .is-active .anim-arrow line{ stroke-dashoffset: 0; }
+
+  /* image cover wipe (left to right reveal of an image) */
+  .anim-wipe{ position:relative; }
+  .anim-wipe::after{
+    content:""; position:absolute; inset:0;
+    background: var(--paper);
+    transform-origin: right;
+    transform: scaleX(1);
+    transition: transform 1.1s cubic-bezier(.8,.1,.2,1) var(--anim-delay, 100ms);
+    pointer-events:none; z-index: 5;
+  }
+  .is-active .anim-wipe::after{ transform: scaleX(0); }
+
+  /* number ticker: numbers count up (scale subtly) */
+  .anim-pop{
+    transform: scale(0.5); opacity:0;
+    transition: transform .8s cubic-bezier(.2,1.4,.4,1) var(--anim-delay, 0ms),
+                opacity .6s ease var(--anim-delay, 0ms);
+  }
+  .is-active .anim-pop{ transform: scale(1); opacity:1; }
+
+  /* respect reduced motion */
+  /* substep reveal: hidden until parent slide has data-substep="N" >= element's data-substep */
+  [data-substep]{
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1);
+    pointer-events: none;
+  }
+  [data-substep-hint]{
+    opacity: 1;
+    transition: opacity .4s ease;
+  }
+  /* show step 1 */
+  section[data-step="1"] [data-substep="1"],
+  section[data-step="2"] [data-substep="1"],
+  section[data-step="2"] [data-substep="2"]{
+    opacity: 1; transform: none; pointer-events: auto;
+  }
+  /* hide hint when all revealed */
+  section[data-step="2"] [data-substep-hint]{ opacity: 0; }
+
+  @media (prefers-reduced-motion: reduce){
+    [data-anim], .split-words .word, .anim-line::after, .anim-arrow path, .anim-arrow line,
+    .anim-wipe::after, .anim-pop{
+      transition: none !important; animation: none !important;
+      opacity:1 !important; transform:none !important; clip-path: none !important;
+      stroke-dashoffset:0 !important;
+    }
+    .anim-line::after, .anim-wipe::after{ display:none; }
+  }
+
+  /* ============ Part 4: closing / future ============ */
+  .s-future .body{
+    position:absolute; left:96px; right:96px; top:160px; bottom:160px;
+    display:flex; flex-direction:column;
+  }
+  .s-future h2{
+    font-family: var(--serif); font-weight:300; font-size:96px; line-height:1;
+    letter-spacing:-0.02em;
+  }
+  .s-future h2 .em{ font-style:italic; color: var(--accent); }
+
+  .era-compare{
+    margin-top:40px; display:grid; grid-template-columns: 1fr 60px 1fr; gap:0; flex:1; min-height:0;
+  }
+  .era-box{
+    border:1px solid var(--ink); padding:48px; display:flex; flex-direction:column; gap:20px;
+  }
+  .era-box.old{ background: var(--paper-2); }
+  .era-box.new{ background: var(--ink); color: var(--paper); }
+  .era-box .era-label{
+    font-family: var(--mono); font-size:14px; letter-spacing:0.16em; text-transform:uppercase;
+  }
+  .era-box.new .era-label{ color: var(--accent-3); }
+  .era-box .era-title{
+    font-family: var(--serif); font-weight:300; font-size:48px; line-height:1.1;
+  }
+  .era-box.new .era-title{ color: var(--paper); }
+  .era-box .era-list{
+    font-size:22px; line-height:1.7; color: var(--ink-2);
+  }
+  .era-box.new .era-list{ color: rgba(244,239,232,0.8); }
+  .era-arrow{
+    display:flex; align-items:center; justify-content:center;
+    font-family: var(--serif); font-size:48px; color: var(--accent);
+  }
+
+  /* skill cards */
+  .skill-grid{
+    margin-top:40px; display:grid; grid-template-columns: repeat(4,1fr); gap:24px; flex:1;
+  }
+  .skill-card{
+    border:1px solid var(--ink); padding:28px 24px; display:flex; flex-direction:column; gap:12px;
+    background: var(--paper);
+    transition: transform .2s;
+    justify-content: flex-start;
+  }
+  .skill-card .sk-icon{
+    width:56px; height:56px; border-radius:50%; background: var(--ink);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .skill-card .sk-icon svg{ width:28px; height:28px; stroke: var(--paper); fill:none; stroke-width:1.5; }
+  .skill-card .sk-num{ font-family: var(--mono); font-size:12px; letter-spacing:0.18em; color: var(--muted); }
+  .skill-card .sk-title{ font-family: var(--serif); font-weight:300; font-size:32px; line-height:1.1; }
+  .skill-card .sk-desc{ font-size:16px; line-height:1.5; color: var(--ink-2); flex:1; }
+  .skill-card .sk-tag{
+    margin-top:8px; padding:6px 14px; border:1px solid var(--accent); border-radius:999px;
+    font-family: var(--mono); font-size:11px; letter-spacing:0.14em; text-transform:uppercase;
+    color: var(--accent); align-self:flex-start;
+  }
+
+  /* curriculum */
+  .curr-grid{
+    margin-top:32px; display:grid; grid-template-columns: repeat(3,1fr); gap:24px; flex:1;
+  }
+  .curr-card{
+    border:1px solid var(--ink); display:flex; flex-direction:column; overflow:hidden;
+  }
+  .curr-card .yr{
+    padding:20px 28px; background: var(--ink); color: var(--paper);
+    font-family: var(--mono); font-size:14px; letter-spacing:0.14em; text-transform:uppercase;
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .curr-card .yr .badge{
+    padding:4px 10px; border:1px solid var(--accent); border-radius:999px;
+    font-size:11px; color: var(--accent);
+  }
+  .curr-card .subjects{
+    padding:28px; flex:1; display:flex; flex-direction:column; gap:14px;
+  }
+  .curr-card .subj{
+    display:flex; gap:12px; align-items:baseline;
+    font-size:20px; line-height:1.4;
+  }
+  .curr-card .subj .dot{ width:6px; height:6px; border-radius:50%; background:var(--accent); flex-shrink:0; margin-top:8px; }
+  .curr-card .subj.ai{ color: var(--accent); font-weight:600; }
+
+  /* career */
+  .career-row{
+    margin-top:40px; display:grid; grid-template-columns: repeat(5,1fr); gap:20px; flex:1;
+  }
+  .career-item{
+    border:1px solid var(--ink); padding:32px 24px; display:flex; flex-direction:column; align-items:center; text-align:center; gap:16px;
+  }
+  .career-item .c-icon{
+    width:64px; height:64px; border-radius:50%; background: var(--paper-2); border:1px solid var(--ink);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .career-item .c-icon svg{ width:28px; height:28px; stroke: var(--ink); fill:none; stroke-width:1.5; }
+  .career-item .c-title{ font-family: var(--serif); font-weight:300; font-size:24px; line-height:1.2; }
+  .career-item .c-desc{ font-size:15px; color: var(--ink-2); line-height:1.4; }
+  .career-item .c-new{
+    padding:4px 10px; background: var(--accent); color: var(--paper); border-radius:999px;
+    font-family: var(--mono); font-size:10px; letter-spacing:0.14em; text-transform:uppercase;
+  }
+
+  /* closing */
+  .s-closing{ background: var(--ink); color: var(--paper); }
+  .s-closing .frame{ border-color: var(--paper); }
+  .s-closing .meta, .s-closing .footer{ color: var(--paper); }
+  .s-closing .footer{ color: rgba(244,239,232,.5); }
+  .s-closing .footer .pageno{ color: var(--paper); }
+  .s-closing .body{
+    position:absolute; left:96px; right:96px; top:50%; transform: translateY(-50%);
+  }
+  .s-closing h2{
+    font-family: var(--serif); font-weight:300; font-size:144px; line-height:1.05;
+    color: var(--paper);
+  }
+  .s-closing h2 .em{ color: var(--accent); font-style:italic; }
+  .s-closing .close-sub{
+    margin-top:48px; font-size:28px; line-height:1.5; color: rgba(244,239,232,0.7);
+    max-width:1200px;
+  }
+  .s-closing .close-info{
+    margin-top:56px; padding-top:32px; border-top:1px solid rgba(244,239,232,0.2);
+    display:flex; gap:80px;
+  }
+  .s-closing .close-info .col .label{
+    font-family: var(--mono); font-size:12px; letter-spacing:0.16em; text-transform:uppercase;
+    color: rgba(244,239,232,0.5); display:block; margin-bottom:10px;
+  }
+  .s-closing .close-info .col .val{
+    font-size:22px; color: var(--paper);
+  }
+
+</style>
+</head>
+<body>
+<deck-stage>
+
+<!-- ===================================================================== -->
+<!-- 01 / TITLE -->
+<!-- ===================================================================== -->
+<section class="s-title">
+  <div class="frame"></div>
+  <div class="meta">
+    <div class="l" style="font-family: Pretendard"><span class="dot"></span>경남정보대학교 인테리어디자인과</div>
+    <div class="r"><span class="badge" style="font-family: Pretendard">고등학생 직업체험</span></div>
+  </div>
+
+  <div class="issue-mark">
+    <div class="nm">No. 01</div>
+    <div class="lbl" style="font-family: var(--sans); letter-spacing: 0; text-transform: none; font-size: 18px;">Opening · 도입강의 20분</div>
+  </div>
+
+  <div class="body">
+    <div class="eyebrow s-title__eyebrow" data-anim="fade" style="--anim-delay: 200ms;">A · I · S · P · A · C · E · D · I · R · E · C · T · O · R</div>
+    <h1 data-anim="up" style="--anim-delay: 350ms;">AI 공간<br><span class="ital">디렉터</span></h1>
+    <div class="sub" data-anim="up" style="--anim-delay: 800ms;">단어가 <span class="em">공간을</span> 만든다.</div>
+  </div>
+
+  <div class="credits" data-anim="up" style="--anim-delay: 1100ms;">
+    <div class="col">
+      <span class="label" style="font-family: Pretendard">Lecture</span>
+      <span class="val" style="font-family: Pretendard">100분 AI 특강</span>
+    </div>
+    <div class="col">
+      <span class="label" style="font-family: Pretendard">Audience</span>
+      <span class="val" style="font-family: Pretendard">고등학생</span>
+    </div>
+    <div class="col">
+      <span class="label" style="font-family: Pretendard">Tool</span>
+      <span class="val" style="font-family: Pretendard">Google Opal · Space Mood Lab</span>
+    </div>
+    <div class="col">
+      <span class="label" style="font-family: Pretendard">Date</span>
+      <span class="val" style="font-family: Pretendard">2026</span>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div style="font-family: Pretendard">경남정보대학교 / 인테리어디자인과</div>
+    <div class="pageno">01 </div>
+  </div>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- 02 / PART 1 DIVIDER -->
+<!-- ===================================================================== -->
+<section class="s-part">
+  <div class="frame"></div>
+  <div class="meta">
+    <div class="l" style="font-family: Pretendard"><span class="dot"></span>Part 1 of 3</div>
+    <div class="r"></div>
+  </div>
+
+  <div class="body">
+    <div class="partno">Part 01</div>
+    <h2>오프닝<br><span class="ital">질문.</span></h2>
+    <div class="lede" style="white-space: nowrap; max-width: none;">한 단어로 시작합니다. 여러분이 가장 먼저 떠올리는 그 단어가, 오늘 수업의 출발점입니다.</div>
+  </div>
+
+  <div class="legend">
+    <span class="time"></span>
+  </div>
+
+  <div class="footer">
+    <div style="font-family: Pretendard">경남정보대학교 / 인테리어디자인과</div>
+    <div class="pageno">02</div>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- 03 / OPENING QUESTION (interactive) -->
+<!-- ===================================================================== -->
+<section class="s-q">
+  <div class="frame"></div>
+  <div class="meta">
+    <div class="l" style="font-family: Pretendard"><span class="dot"></span>Part 1 / Question</div>
+    <div class="r" style="font-family: Pretendard">A SINGLE WORD</div>
+  </div>
+
+  <div class="body">
+    <div class="kicker" data-anim="up" style="font-family: Pretendard; --anim-delay: 200ms;"><span class="num">Q.</span>FOR YOU</div>
+    <h2 data-anim="up" style="margin-top: 48px; font-weight: 300; --anim-delay: 450ms;">
+      지금 자기만의 방을 꾸밀 수 있다면,<br>
+      <span class="em" style="font-weight: 300">딱 한 단어</span>로<br>
+      어떤 <span class="serif underline" style="color: rgb(200, 70, 44)">느낌</span>의 방을 원하나요?
+    </h2>
+  </div>
+
+  <div class="answer-row" id="chip-row" data-anim="up" style="--anim-delay: 1100ms;">
+    <span class="label" style="font-family: Pretendard">Examples →</span>
+    <span class="chip">아늑한</span>
+    <span class="chip">힙한</span>
+    <span class="chip">깔끔한</span>
+    <span class="chip">시원한</span>
+    <span class="chip">미니멀한</span>
+  </div>
+
+  <div class="input-area" data-anim="up" style="--anim-delay: 1400ms;">
+    <input id="student-word" type="text" placeholder="여기에 학생 답변을 입력하세요..." maxlength="20">
+    <button class="add" id="add-word" style="font-family: Pretendard">+ 칠판에 올리기</button>
+    <span class="hint" style="font-family: Pretendard">Enter 키로도 추가됩니다 · 추가된 답변은 Part 3에서 다시 등장합니다</span>
+  </div>
+
+  <div class="footer">
+    <div></div>
+    <div class="pageno">03 </div>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- 04 / FORESHADOW -->
+<!-- ===================================================================== -->
+<section class="s-fore">
+  <div class="frame"></div>
+  <div class="meta">
+    <div class="l" style="font-family: Pretendard"><span class="dot"></span>Part 1 / Bridge</div>
+    <div class="r" style="font-family: Pretendard">FORESHADOW</div>
+  </div>
+
+  <div class="body">
+    <div class="quotemark" data-anim="fade" style="--anim-delay: 100ms;">“</div>
+    <h2 style="line-height: 1" data-anim="up"><span style="white-space: nowrap;" data-anim="up">여러분이 말한 그 <span class="em">한 단어</span>가,</span><br>사실은 엄청난 힘을 가지고 있습니다.</h2>
+    <div class="attr" style="font-family: Pretendard">
+</div>
+  </div>
+
+  <div class="footer">
+    <div style="font-family: Pretendard">Part 1 · 복선</div>
+    <div class="pageno">04</div>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- 05 / PART 2 DIVIDER -->
+<!-- ===================================================================== -->
+<section class="s-part">
+  <div class="frame"></div>
+  <div class="meta">
+    <div class="l" style="font-family: Pretendard"><span class="dot"></span>Part 2 of 3</div>
+    <div class="r"></div>
+  </div>
+
+  <div class="body">
+    <div class="partno">Part 02</div>
+    <h2>AI와 인테리어,<br><span class="ital">변화의</span> 한복판.</h2>
+    <div class="lede" style="font-family: Pretendard; white-space: nowrap; max-width: none;">도면과 3D를 그리던 시대에서, 단어로 공간을 짓는 시대로. 디자이너는 사라지지 않습니다 - 다른 존재가 됩니다.</div>
+  </div>
+
+  <div class="legend">
+    <span class="time">
+</span>
+  </div>
+
+  <div class="footer">
+    <div style="font-family: Pretendard">경남정보대학교 / 인테리어디자인과</div>
+    <div class="pageno">05</div>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- 06 / EXISTING INTERIOR DESIGN -->
+<!-- ===================================================================== -->
+<section class="s-existing">
+  <div class="frame"></div>
+  <div class="meta">
+    <div class="l" style="font-family: Pretendard"><span class="dot"></span>Part 2 / Status quo</div>
+    <div class="r" style="font-family: Pretendard">EX · 인테리어디자인 = ?</div>
+  </div>
+
+  <div class="body">
+    <div class="kicker" style="font-family: Pretendard"><span class="num">02 · 1</span>지금까지의 인테리어디자인</div>
+    <h2 style="margin-top:48px;">손으로 그리고,<br>오래 <span class="em">매만지는</span> 일.</h2>
+
+    <div class="grid">
+      <!-- card 1 -->
+      <div class="craft-card" data-anim="up" style="--anim-delay: 200ms;">
+        <div class="clock">~ 4 hr</div>
+        <div class="ph" style="padding:0; overflow:hidden;">
+          <img src="assets/06-도면.png" alt="건축 도면" style="width:100%; height:100%; object-fit:cover; display:block;">
+        </div>
+        <div class="cap">
+          <span class="num" style="font-family: Pretendard">A - 01</span>
+          <span class="ttl" style="font-family: Fraunces">도면</span>
+          <span class="desc">평면, 입면, 단면 - 모든 치수를 손으로 결정</span>
+        </div>
+      </div>
+      <!-- card 2 -->
+      <div class="craft-card" data-anim="up" style="--anim-delay: 450ms;">
+        <div class="clock">~ 8 hr</div>
+        <div class="ph" style="padding:0; overflow:hidden;">
+          <img src="assets/06-3D모델링.png" alt="3D 모델링 작업실" style="width:100%; height:100%; object-fit:cover; display:block;">
+        </div>
+        <div class="cap">
+          <span class="num" style="font-family: Pretendard">A - 02</span>
+          <span class="ttl">3D 모델링</span>
+          <span class="desc">SketchUp · 3ds Max - 가상 공간 구축, 렌더링</span>
+        </div>
+      </div>
+      <!-- card 3 -->
+      <div class="craft-card" data-anim="up" style="--anim-delay: 700ms;">
+        <div class="clock">~ 3 days</div>
+        <div class="ph" style="padding:0; overflow:hidden;">
+          <img src="assets/06-자재선택.png" alt="자재 샘플 보드" style="width:100%; height:100%; object-fit:cover; display:block;">
+        </div>
+        <div class="cap">
+          <span class="num" style="font-family: Pretendard">A - 03</span>
+          <span class="ttl">자재 선택</span>
+          <span class="desc">샘플북, 시공 견적, 클라이언트 미팅 반복</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bridge" data-anim="up" style="--anim-delay: 1000ms; margin-top: auto; padding-top: 28px; display:flex; align-items:baseline; gap: 28px; border-top: 1px solid var(--ink);">
+      <span style="font-family: var(--mono); font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-2); white-space: nowrap;">그런데 —</span>
+      <span style="font-family: var(--serif); font-style: italic; font-weight: 300; font-size: 36px; line-height: 1.2; color: var(--ink);">
+        이 긴 과정이, 이제는 <span style="color: var(--accent);">한 문장</span>으로 시작됩니다.
+      </span>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div style="font-family: Pretendard">Part 2 · 변화의 시작점</div>
+    <div class="pageno">06</div>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- 07 / BEFORE AFTER 1 -->
+<!-- ===================================================================== -->
+<section class="s-ba">
+  <div class="frame"></div>
+  <div class="meta">
+    <div class="l" style="font-family: Pretendard"><span class="dot"></span>Part 2 / Demo · I</div>
+    <div class="r">BEFORE / AFTER · 01</div>
+  </div>
+
+  <div class="body">
+    <div class="topline">
+      <div class="kicker" style="font-family: Pretendard"><span class="num">02 · 2</span>같은 방, 다른 결과</div>
+      <div class="kicker" style="font-family: Pretendard">FRAME 01</div>
+    </div>
+    <h2>문장 한 줄이면<br><span class="em">10초.</span></h2>
+
+    <div class="ba-grid">
+      <div class="pane before" data-anim="up" style="--anim-delay: 100ms;">
+        <div class="pmeta">
+          <span>SOURCE · 빈 방</span>
+          <span class="tag">BEFORE</span>
+        </div>
+        <div class="ph-inner anim-wipe" style="padding:0; --anim-delay: 250ms;">
+          <img src="assets/07-before-빈방.png" alt="빈 방" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;">
+        </div>
+        <div class="pcap">
+          <span>아무것도 없는 빈 방</span>
+          <span class="right">SOURCE</span>
+        </div>
+      </div>
+
+      <div class="arrow" data-anim="fade" style="--anim-delay: 1100ms;">
+        <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.5" class="anim-arrow">
+          <path d="M20 50 L80 50"/>
+          <path d="M68 38 L80 50 L68 62"/>
+        </svg>
+        <div class="lbl">
+          PROMPT
+          <span class="big">"미니멀한<br>자연광 거실,<br>오크 바닥,<br>린넨 소파"</span>
+        </div>
+      </div>
+
+      <div class="pane after" data-anim="up" style="--anim-delay: 1700ms;">
+        <div class="pmeta">
+          <span>RESULT · 미니멀</span>
+          <span class="tag">AFTER</span>
+        </div>
+        <div class="ph-inner anim-wipe" style="padding:0; --anim-delay: 1900ms;">
+          <img src="assets/07-after-minimal.png" alt="미니멀 자연광 거실" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;">
+        </div>
+        <div class="pcap">
+          <span>미니멀 자연광 거실</span>
+          <span class="right">~ 10s</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat">
+      <div class="l" style="font-family: Pretendard">DESIGNER WORK · 3D MODELING</div>
+      <div class="r"><span class="strike">3 ~ 4시간</span><span class="accent">→ 10초</span></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div style="font-family: Pretendard">Part 2 · Before / After 01</div>
+    <div class="pageno">07 </div>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- 08 / BEFORE AFTER 2 (same room, different sentence) -->
+<!-- ===================================================================== -->
+<section class="s-ba">
+  <div class="frame"></div>
+  <div class="meta">
+    <div class="l" style="font-family: Pretendard"><span class="dot"></span>Part 2 / Demo · II</div>
+    <div class="r" style="font-family: Pretendard">BEFORE / AFTER · 02</div>
+  </div>
+
+  <div class="body">
+    <div class="topline">
+      <div class="kicker" style="font-family: Pretendard"><span class="num">02 · 3</span>같은 방, 다른 문장</div>
+      <div class="kicker" style="font-family: Pretendard">FRAME 02</div>
+    </div>
+    <h2>문장만 바꿨더니,<br><span class="em">전혀 다른</span> 공간.</h2>
+
+    <div class="ba-grid">
+      <div class="pane before" data-anim="up" style="--anim-delay: 100ms;">
+        <div class="pmeta">
+          <span>SOURCE · 같은 빈 방</span>
+          <span class="tag">SAME</span>
+        </div>
+        <div class="ph-inner anim-wipe" style="padding:0; --anim-delay: 250ms;">
+          <img src="assets/08-source-empty.png" alt="같은 빈 방" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;">
+        </div>
+        <div class="pcap">
+          <span>좌측 슬라이드와 동일한 빈 방</span>
+          <span class="right">SOURCE</span>
+        </div>
+      </div>
+
+      <div class="arrow" data-anim="fade" style="--anim-delay: 1100ms;">
+        <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.5" class="anim-arrow">
+          <path d="M20 50 L80 50"/>
+          <path d="M68 38 L80 50 L68 62"/>
+        </svg>
+        <div class="lbl">
+          NEW PROMPT
+          <span class="big">"드라마틱한<br>다크무드,<br>벨벳마감,<br>따뜻한<br>간접조명"</span>
+        </div>
+      </div>
+
+      <div class="pane after" data-anim="up" style="--anim-delay: 1700ms;">
+        <div class="pmeta">
+          <span>RESULT · 드라마틱</span>
+          <span class="tag">AFTER</span>
+        </div>
+        <div class="ph-inner anim-wipe" style="padding:0; --anim-delay: 1900ms;">
+          <img src="assets/08-after-dramatic.png" alt="드라마틱 다크 무드 거실" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;">
+        </div>
+        <div class="pcap">
+          <span>드라마틱 무드 거실</span>
+          <span class="right">~ 10s</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat">
+      <div class="l" style="font-family: Pretendard">SAME ROOM · DIFFERENT SENTENCE</div>
+      <div class="r"><span class="serif">하나의 방을, 단어로 다시 짓는다.</span></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div style="font-family: Pretendard">Part 2 · Before / After 02</div>
+    <div class="pageno">08</div>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- 09 / DESIGNER REPLACED? -->
+<!-- ===================================================================== -->
+<section class="s-replace">
+  <div class="frame"></div>
+  <div class="meta">
+    <div class="l" style="font-family: Pretendard"><span class="dot"></span>Part 2 / Tension</div>
+    <div class="r" style="font-family: Pretendard">A QUESTION</div>
+  </div>
+
+  <div class="body">
+    <div class="kicker" data-anim="up" style="font-family: Pretendard; --anim-delay: 200ms;"><span class="num">02 · 4</span>그렇다면, 디자이너는?</div>
+    <div class="q" data-anim="up" style="--anim-delay: 450ms;">디자이너가 사라진다?</div>
+    <div class="a" data-substep="1">아닙니다. <span class="em">오히려 더 중요</span>해집니다.</div>
+    <div class="note" data-substep="2" style="font-family: Pretendard">왜냐하면 - AI에게 <span class="ital serif">무엇을 만들어라</span> 지시하는 일은, 여전히 사람의 몫이기 때문입니다.</div>
+    <div class="step-hint" data-substep-hint style="position:absolute; bottom: 0; right: 0; font-family: var(--mono); font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-2); display:flex; align-items:center; gap: 10px;">
+      <span style="display:inline-block; width: 28px; height: 18px; border: 1px solid var(--ink-2); border-radius: 3px; text-align:center; line-height:16px; font-size: 10px;">␣</span>
+      <span>또는 클릭으로 다음</span>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div style="font-family: Pretendard">Part 2 · 디자이너의 자리</div>
+    <div class="pageno">09 </div>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- 10 / DIRECTOR -->
+<!-- ===================================================================== -->
+<section class="s-director">
+  <div class="frame"></div>
+  <div class="meta">
+    <div class="l" style="font-family: Pretendard"><span class="dot"></span>Part 2 / Concept</div>
+    <div class="r" style="font-family: Pretendard">A NEW ROLE</div>
+  </div>
+
+  <div class="body">
+    <div class="head">
+      <div>
+        <div class="kicker" data-anim="up" style="font-family: Pretendard; --anim-delay: 200ms;"><span class="num">02 · 5</span>새로운 역할의 이름</div>
+        <h2 data-anim="up" style="margin-top:32px; --anim-delay: 450ms;">AI 공간 <span class="em">디렉터.</span></h2>
+      </div>
+    </div>
+
+    <div class="compare">
+      <div class="col a" data-anim="up" style="--anim-delay: 800ms;">
+        <div class="role" style="font-family: Pretendard">A · ANALOGY</div>
+        <div class="ttl">영화 <span class="ital">감독.</span></div>
+        <div class="arrow">
+          <span style="font-family: Pretendard">지시</span>
+          <svg viewBox="0 0 48 12" fill="none" stroke="currentColor" stroke-width="1.4">
+            <path d="M0 6 L46 6"/>
+            <path d="M40 1 L46 6 L40 11"/>
+          </svg>
+        </div>
+        <div class="target">배우의 연기</div>
+        <div class="what">"창밖을 보면서, 목소리를 낮추고, 3초간 멈춰."<br>구체적 지시가 좋은 연기를 만든다.</div>
+      </div>
+      <div class="col b" data-anim="up" style="--anim-delay: 1100ms;">
+        <div class="role" style="font-family: Pretendard">B · OUR ROLE</div>
+        <div class="ttl">공간 <span class="ital">디렉터.</span></div>
+        <div class="arrow">
+          <span style="font-family: Pretendard">지시</span>
+          <svg viewBox="0 0 48 12" fill="none" stroke="currentColor" stroke-width="1.4">
+            <path d="M0 6 L46 6"/>
+            <path d="M40 1 L46 6 L40 11"/>
+          </svg>
+        </div>
+        <div class="target">AI의 공간</div>
+        <div class="what">"북유럽 스타일, 오크 바닥, 간접조명, 세이지 그린."<br>구체적 단어가 좋은 공간을 만든다.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div style="font-family: Pretendard">Part 2 · AI 공간 디렉터</div>
+    <div class="pageno">10 </div>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- 11 / SPECIFIC INSTRUCTION -->
+<!-- ===================================================================== -->
+<section class="s-specific">
+  <div class="frame"></div>
+  <div class="meta">
+    <div class="l"><span class="dot"></span>Part 2 / Why specificity</div>
+    <div class="r">VAGUE  ⟶  PRECISE</div>
+  </div>
+
+  <div class="body">
+    <div class="kicker" data-anim="up" style="font-family: Pretendard; --anim-delay: 200ms;"><span class="num">02 · 6</span>왜 ‘단어를 잘 고르는 것’이 중요한가</div>
+    <h2 data-anim="up" style="margin-top: 32px; line-height: 1.2; --anim-delay: 450ms;">막연한 지시는<br><span class="em">막연한</span> 결과를 부른다.</h2>
+
+    <div class="pairs">
+      <div class="pair" data-anim="up" style="--anim-delay: 750ms;">
+        <div class="scene" style="font-family: Pretendard">
+          <span class="num">A</span>
+          영화 감독
+        </div>
+        <div class="vague">"대충 슬프게 해봐."</div>
+        <div class="vs">VS</div>
+        <div class="precise">"<span class="tok">창밖</span>을 보면서, <span class="tok">낮은 목소리</span>로, <span class="tok">3초간</span> 멈춰."</div>
+      </div>
+
+      <div class="pair" data-anim="up" style="--anim-delay: 1100ms;">
+        <div class="scene" style="font-family: Pretendard">
+          <span class="num">B</span>
+          공간 디렉터
+        </div>
+        <div class="vague">"따뜻하게 해줘."</div>
+        <div class="vs">VS</div>
+        <div class="precise" style="white-space:nowrap; font-size:28px; padding: 32px 28px;"><span class="tok">북유럽</span> 스타일, <span class="tok">오크 바닥</span>, <span class="tok">간접조명</span>, <span class="tok">세이지 그린</span>.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div style="font-family: Pretendard">Part 2 · 구체적 지시의 힘</div>
+    <div class="pageno">11</div>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- 12 / PART 3 DIVIDER -->
+<!-- ===================================================================== -->
+<section class="s-part">
+  <div class="frame"></div>
+  <div class="meta">
+    <div class="l" style="font-family: Pretendard"><span class="dot"></span>Part 3 of 3</div>
+    <div class="r"></div>
+  </div>
+
+  <div class="body">
+    <div class="partno" data-anim="up" style="--anim-delay: 200ms;">Part 03</div>
+    <h2 data-anim="up" style="--anim-delay: 450ms;">프로세스 시연,<br><span class="ital">그리고</span> 인계.</h2>
+    <div class="lede" data-anim="up" style="--anim-delay: 700ms;">키워드를 고르고, 단어를 바꾸고, 공간이 다시 태어나는 과정을 라이브로 봅니다. 그리고 여러분의 PC 앞으로 넘어갑니다.</div>
+  </div>
+
+  <div class="legend">
+    <span class="time"></span>
+  </div>
+
+  <div class="footer">
+    <div style="font-family: Pretendard">경남정보대학교 / 인테리어디자인과</div>
+    <div class="pageno">12 </div>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- 13 / HERO CLAIM -->
+<!-- ===================================================================== -->
+<section class="s-hero">
+  <div class="frame"></div>
+  <div class="meta">
+    <div class="l" style="font-family: Pretendard"><span class="dot"></span>Part 3 / Thesis</div>
+    <div class="r" style="font-family: Pretendard">CORE STATEMENT</div>
+  </div>
+
+  <div class="annot">
+    The whole 100-minute lecture<br>compressed into one line.
+  </div>
+
+  <div class="body">
+    <h1>
+      <span data-anim="up" style="display:inline-block; --anim-delay: 200ms;">단어가</span><br>
+      <span class="em ital" data-anim="up" style="display:inline-block; --anim-delay: 700ms;">공간을</span><br>
+      <span data-anim="up" style="display:inline-block; --anim-delay: 1200ms;">만든다.</span>
+    </h1>
+  </div>
+
+  <div class="stamp">— 오늘의 핵심 명제</div>
+
+  <div class="footer">
+    <div style="font-family: Pretendard">Part 3 · 핵심 명제</div>
+    <div class="pageno">13 — 18</div>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- 14 / PROCESS FLOW (animated) -->
+<!-- ===================================================================== -->
+<section class="s-process">
+  <div class="frame"></div>
+  <div class="meta">
+    <div class="l" style="font-family: Pretendard"><span class="dot"></span>Part 3 / Workflow</div>
+    <div class="r" style="font-family: Pretendard">5 STEP PROCESS</div>
+  </div>
+
+  <div class="body">
+    <div class="head">
+      <div>
+        <div class="kicker" style="font-family: Pretendard"><span class="num">03 · 1</span>오늘 여러분이 할 일의 전체 그림</div>
+        <h2 style="margin-top:24px;">키워드에서 <span class="em">완성</span>까지.</h2>
+      </div>
+      <div class="legend-row">
+        <div class="it" style="font-family: Pretendard"><span class="sw you"></span>YOU · 당신이 한다</div>
+        <div class="it" style="font-family: Pretendard"><span class="sw ai"></span>AI · AI가 한다</div>
+      </div>
+    </div>
+
+    <div class="flow" id="flow">
+      <div class="arrows" id="arrows">
+        <span class="a" style="left: 9%; width: 14.5%;"></span>
+        <span class="a" style="left: 29%; width: 14.5%;"></span>
+        <span class="a" style="left: 49%; width: 14.5%;"></span>
+        <span class="a" style="left: 69%; width: 14.5%;"></span>
+      </div>
+
+      <div class="step you">
+        <div class="ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="3" y="6" width="18" height="3"/>
+            <rect x="3" y="11" width="12" height="3"/>
+            <rect x="3" y="16" width="15" height="3"/>
+          </svg>
+        </div>
+        <div class="num">01</div>
+        <div class="who">YOU</div>
+        <div class="ttl">키워드 <span class="ital">선택</span></div>
+        <div class="desc" style="font-family: Pretendard">아늑한 · 자연광 · 원목 · 미니멀</div>
+      </div>
+
+      <div class="step ai">
+        <div class="ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M4 18 L4 6 L20 6 L20 18 Z"/>
+            <line x1="4" y1="10" x2="20" y2="10"/>
+            <line x1="7" y1="14" x2="17" y2="14"/>
+          </svg>
+        </div>
+        <div class="num">02</div>
+        <div class="who">AI</div>
+        <div class="ttl">프롬프트<br><span class="ital">조립</span></div>
+        <div class="desc">선택된 단어를 영문 문장으로 변환</div>
+      </div>
+
+      <div class="step ai">
+        <div class="ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="3" y="5" width="18" height="14"/>
+            <circle cx="8" cy="10" r="1.5"/>
+            <path d="M3 17 L9 12 L14 16 L21 9"/>
+          </svg>
+        </div>
+        <div class="num">03</div>
+        <div class="who">AI</div>
+        <div class="ttl">이미지 <span class="ital">생성</span></div>
+        <div class="desc">문장을 공간 이미지로 시각화</div>
+      </div>
+
+      <div class="step you">
+        <div class="ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="11" cy="11" r="6"/>
+            <path d="M16 16 L21 21"/>
+          </svg>
+        </div>
+        <div class="num">04</div>
+        <div class="who">YOU</div>
+        <div class="ttl">비교 / <span class="ital">수정</span></div>
+        <div class="desc">단어 하나만 바꿔서 다시 시도</div>
+      </div>
+
+      <div class="step you">
+        <div class="ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M5 12 L10 17 L20 7"/>
+          </svg>
+        </div>
+        <div class="num">05</div>
+        <div class="who">YOU</div>
+        <div class="ttl">완성</div>
+        <div class="desc">의도와 가장 가까운 결과 확정</div>
+      </div>
+    </div>
+
+    <div class="repeat">
+      <span class="arc"></span>
+      <span style="font-family: Pretendard">03 ↔ 04 사이를 반복하면서, ‘의도에 가장 가까운’ 단어 조합을 찾아갑니다.</span>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div style="font-family: Pretendard">Part 3 · 5 step process</div>
+    <div class="pageno">14</div>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- 15 / WHY OPAL · context note -->
+<!-- ===================================================================== -->
+<section class="s-why">
+  <div class="frame"></div>
+  <div class="meta">
+    <div class="l" style="font-family: Pretendard"><span class="dot"></span>Part 3 / Context</div>
+    <div class="r" style="font-family: Pretendard">WHY THIS DEMO</div>
+  </div>
+
+  <div class="body">
+    <div class="kicker" data-anim="up" style="font-family: Pretendard; --anim-delay: 200ms;"><span class="num">03 · 2</span>이 시연을 하는 이유</div>
+    <h2 data-anim="up" style="--anim-delay: 450ms;">사례를 다 보여주기엔,<br><span class="em">100분</span>은 너무 짧습니다.</h2>
+
+    <div class="why-grid">
+      <div class="col" data-anim="up" style="--anim-delay: 800ms;">
+        <div class="ttl" style="font-family: Pretendard">하고 싶었지만 못한 것</div>
+        <div class="desc">AI를 활용한 실제 인테리어 디자인 사례 -국내외 스튜디오의 작업 흐름, 결과물의 다양성, 도구 비교까지 다루기엔 시간이 부족합니다.</div>
+      </div>
+      <div class="divider" aria-hidden="true"></div>
+      <div class="col b" data-anim="up" style="--anim-delay: 1050ms;">
+        <div class="ttl" style="font-family: Pretendard">대신 우리가 할 것</div>
+        <div class="desc">가장 기본적인 한 가지 - 단어를 바꾸면 공간이 바뀐다 - 를 Opal 앱으로 직접 체험합니다.</div>
+      </div>
+    </div>
+
+    <div class="punch" data-anim="up" style="--anim-delay: 1400ms;">
+      <span class="lbl" style="font-family: var(--mono)">TAKEAWAY</span>
+      <span class="txt">기본 동작을 손에 익히면, 그 다음의 모든 사례가 같은 원리로 보이기 시작합니다.</span>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div style="font-family: Pretendard">Part 3 · 시연 맥락</div>
+    <div class="pageno">15</div>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- 16 / LIVE DEMO PLACEHOLDER -->
+<!-- ===================================================================== -->
+<section class="s-demo">
+  <div class="frame"></div>
+  <div class="meta">
+    <div class="l" style="font-family: Pretendard"><span class="dot"></span>Part 3 / Live</div>
+    <div class="r" style="font-family: Pretendard">LIVE DEMO · OPAL</div>
+  </div>
+
+  <div class="body">
+    <div class="head">
+      <div>
+        <div class="kicker" data-anim="up" style="font-family: Pretendard; --anim-delay: 200ms;"><span class="num">03 · 2</span>직접 보여드리겠습니다</div>
+        <h2 data-anim="up" style="margin-top: 24px; line-height: 1.2; --anim-delay: 450ms;">Space Mood Lab,<br>지금 이 화면에서 <span class="em">시연.</span></h2>
+      </div>
+    </div>
+
+    <div class="opal" data-anim="zoom" style="--anim-delay: 800ms;">
+      <div class="corner">OPAL APP · LIVE SCREEN</div>
+      <img class="shot" src="assets/opal_screenshot.png" alt="Space Mood Lab — Opal 앱 시작 화면">
+    </div>
+  </div>
+
+  <div class="footer">
+    <div style="font-family: Pretendard">Part 3 · 라이브 시연</div>
+    <div class="pageno">16 </div>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- 16 / DEMO RECAP -->
+<!-- ===================================================================== -->
+<section class="s-recap">
+  <div class="frame"></div>
+  <div class="meta">
+    <div class="l" style="font-family: Pretendard"><span class="dot"></span>Part 3 / Recap</div>
+    <div class="r" style="font-family: Pretendard">SAME ROOM · DIFFERENT WORD</div>
+  </div>
+
+  <div class="body">
+    <div class="head">
+      <div>
+        <div class="kicker" data-anim="up" style="font-family: Pretendard; --anim-delay: 200ms;"><span class="num">03 · 3</span>방금 시연에서 보신 것</div>
+        <h2 data-anim="up" style="margin-top:24px; --anim-delay: 400ms;">같은 방, 다른 단어, <span class="em">다른 공간.</span></h2>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="item a" data-anim="up" style="--anim-delay: 700ms;">
+        <div class="img">
+          <span class="tag">RUN 01</span>
+          <svg class="glyph" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1">
+            <rect x="14" y="22" width="72" height="56"/>
+            <rect x="22" y="40" width="20" height="20"/>
+            <line x1="56" y1="40" x2="76" y2="40"/>
+            <line x1="56" y1="48" x2="72" y2="48"/>
+            <line x1="56" y1="56" x2="76" y2="56"/>
+          </svg>
+        </div>
+        <div class="cap">
+          <div class="kw">
+            <span>미니멀</span>
+            <span>따뜻한</span>
+            <span>자연광</span>
+            <span>원목</span>
+            <span>웜 화이트</span>
+          </div>
+          <div class="ttl">밝고 차분한 거실.</div>
+        </div>
+      </div>
+
+      <div class="item b" data-anim="up" style="--anim-delay: 1000ms;">
+        <div class="img">
+          <span class="tag">RUN 02</span>
+          <svg class="glyph" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1">
+            <rect x="14" y="22" width="72" height="56"/>
+            <circle cx="32" cy="50" r="10"/>
+            <line x1="56" y1="40" x2="76" y2="40"/>
+            <line x1="56" y1="50" x2="76" y2="50"/>
+            <line x1="56" y1="60" x2="68" y2="60"/>
+          </svg>
+        </div>
+        <div class="cap">
+          <div class="kw">
+            <span>미니멀</span>
+            <span class="changed">드라마틱</span>
+            <span>자연광</span>
+            <span>원목</span>
+            <span>웜 화이트</span>
+          </div>
+          <div class="ttl">긴장감 있는 무드 거실.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="punchline" data-anim="up" style="--anim-delay: 1400ms;">단어 <span class="em">하나</span>의 차이가, 공간 <span class="em">전체</span>를 바꾼다.</div>
+
+    <div class="student-callback" id="student-callback" data-anim="up" style="--anim-delay: 1700ms; display:none; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--ink); display:flex; align-items:center; gap: 16px; flex-wrap:wrap;">
+      <span style="font-family: var(--mono); font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-2);">From slide 03 · 여러분의 단어들 →</span>
+      <span class="kw-row" id="student-callback-chips" style="display:flex; flex-wrap:wrap; gap: 8px;"></span>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div style="font-family: Pretendard">Part 3 · 시연 정리</div>
+    <div class="pageno">17</div>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- 17 / HANDOFF -->
+<!-- ===================================================================== -->
+<section class="s-handoff">
+  <div class="frame"></div>
+  <div class="meta">
+    <div class="l" style="font-family: Pretendard"><span class="dot"></span>Part 3 / Handoff</div>
+    <div class="r" style="font-family: Pretendard">YOUR TURN · NEXT 80 MIN</div>
+  </div>
+
+  <div class="body">
+    <div>
+      <div class="kicker" data-anim="up" style="--anim-delay: 200ms;"><span class="num">03 · 4</span>이제 여러분 차례입니다</div>
+      <h2 data-anim="up" style="margin-top:24px; --anim-delay: 400ms;">PC 앞으로,<br><span class="em">단어를</span> 골라보세요.</h2>
+    </div>
+
+    <div class="stages">
+      <div class="stage" data-anim="up" style="--anim-delay: 750ms;">
+        <div class="num">01</div>
+        <div class="who" style="font-family: Pretendard">SOLO · 개인 탐색</div>
+        <div class="ttl">키워드를 골라<br>공간을 <span class="ital">바꿔본다.</span></div>
+        <div class="desc">스스로 5~6개의 단어를 선택하고, 한 단어를 바꿔보며 공간이 어떻게 달라지는지 직접 확인합니다.</div>
+        <div class="time" style="font-family: Pretendard">25 min</div>
+      </div>
+
+      <div class="stage" data-anim="up" style="--anim-delay: 1050ms;">
+        <div class="num">02</div>
+        <div class="who" style="font-family: Pretendard">DUO · 2인 1조 미션</div>
+        <div class="ttl">가상 클라이언트를 위해<br>팀으로 <span class="ital">설계한다.</span></div>
+        <div class="desc" style="font-family: Pretendard">제시된 클라이언트 브리프에 맞춰, 두 사람이 단어를 골라 협업으로 하나의 공간을 완성하고 발표합니다.</div>
+        <div class="time" style="font-family: Pretendard">30 min · + 25 min 발표</div>
+      </div>
+    </div>
+
+    <div class="url" data-anim="up" style="--anim-delay: 1450ms;">
+      <span class="lbl">PC에서 접속 →</span>
+      <span class="addr">[강의 당일 안내]<span class="cursor"></span></span>
+      <span style="margin-left: 24px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-2);">Opal 앱 배포 후 실제 URL로 교체</span>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div style="font-family: Pretendard">End of Part 3 · 도입 강의 종료</div>
+    <div class="pageno">18</div>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- 19 / PART 4 DIVIDER — CLOSING -->
+<!-- ===================================================================== -->
+<section class="s-part">
+  <div class="frame"></div>
+  <div class="meta">
+    <div class="l" style="font-family: Pretendard"><span class="dot"></span>Part 4 of 4</div>
+    <div class="r"></div>
+  </div>
+
+  <div class="body">
+    <div class="partno">Part 04</div>
+    <h2>AI 시대,<br><span class="ital">디자인 교육의</span><br>새 방향.</h2>
+    <div class="lede" style="font-family: Pretendard; white-space: nowrap; max-width: none;">오늘 여러분이 체험한 것은 시작일 뿐입니다. 이 변화를 3년간 깊이 배울 수 있는 곳이 있습니다.</div>
+  </div>
+
+  <div class="legend">
+    <span class="time"></span>
+  </div>
+
+  <div class="footer">
+    <div style="font-family: Pretendard">경남정보대학교 / 인테리어디자인과</div>
+    <div class="pageno">19</div>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- 20 / EDUCATION ERA SHIFT -->
+<!-- ===================================================================== -->
+<section class="s-future">
+  <div class="frame"></div>
+  <div class="meta">
+    <div class="l" style="font-family: Pretendard"><span class="dot"></span>Part 4 / Shift</div>
+    <div class="r" style="font-family: Pretendard">EDUCATION · BEFORE → AFTER</div>
+  </div>
+
+  <div class="body">
+    <div class="kicker" style="font-family: Pretendard" data-anim="up" style="--anim-delay: 200ms;"><span class="num">04 · 1</span>인테리어 교육이 달라지고 있습니다</div>
+    <h2 data-anim="up" style="margin-top:48px; --anim-delay: 400ms;">배우는 것이 <span class="em">바뀌면,</span><br>가르치는 것도 바뀝니다.</h2>
+
+    <div class="era-compare">
+      <div class="era-box old" data-anim="up" style="--anim-delay: 700ms;">
+        <div class="era-label">Before · 기존 교육</div>
+        <div class="era-title">도구 <span style="font-style:italic">숙련</span> 중심</div>
+        <div class="era-list">
+          도면 제도·3D 소프트웨어에 수 년<br>
+          기술 습득에 시간의 대부분 소모<br>
+          결과물을 보기까지 긴 시간 필요<br>
+          '그림만 그리는 디자이너' 양성
+        </div>
+      </div>
+      <div class="era-arrow" data-anim="fade" style="--anim-delay: 1000ms;">→</div>
+      <div class="era-box new" data-anim="up" style="--anim-delay: 1100ms;">
+        <div class="era-label">After · 우리 학과의 교육</div>
+        <div class="era-title">A.I 증강 <span style="font-style:italic; color: var(--accent);">디자이너</span></div>
+        <div class="era-list">
+          AI로 완성도 높은 결과를 먼저 경험<br>
+          학습의 즐거움이 기술적 고통을 압도<br>
+          현장 문제를 소통하고 해결하는 실무자<br>
+          기술은 AI가, 방향과 판단은 사람이
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div style="font-family: Pretendard">Part 4 · 교육 패러다임 전환</div>
+    <div class="pageno">20</div>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- 21 / FUTURE DESIGNER SKILLS — with illustrations -->
+<!-- ===================================================================== -->
+<section class="s-future">
+  <div class="frame"></div>
+  <div class="meta">
+    <div class="l" style="font-family: Pretendard"><span class="dot"></span>Part 4 / Skills</div>
+    <div class="r" style="font-family: Pretendard">4 CORE COMPETENCIES</div>
+  </div>
+
+  <div class="body">
+    <div class="kicker" style="font-family: Pretendard" data-anim="up"><span class="num">04 · 2</span>A.I 증강 디자이너의 4대 핵심역량</div>
+    <h2 data-anim="up" style="margin-top:36px;">그리는 기술 <span class="em">너머의</span> 것들.</h2>
+
+    <div style="margin-top:36px; display:grid; grid-template-columns: repeat(4,1fr); gap:24px; flex:1;">
+      <div style="border:1px solid var(--ink); display:flex; flex-direction:column; overflow:hidden;" data-anim="up" style="--anim-delay: 600ms;">
+        <div style="flex:1; background: var(--paper-2); display:flex; align-items:center; justify-content:center; padding:32px;">
+          <svg viewBox="0 0 120 120" fill="none" stroke="var(--ink)" stroke-width="1.2" style="width:100%; max-height:140px;">
+            <rect x="20" y="30" width="80" height="60" rx="3"/>
+            <rect x="30" y="45" width="25" height="20" rx="2" fill="var(--paper-3)"/>
+            <line x1="65" y1="50" x2="90" y2="50"/>
+            <line x1="65" y1="58" x2="85" y2="58"/>
+            <path d="M30 80 L50 80 L50 90 L70 90" stroke="var(--accent)" stroke-width="1.5"/>
+            <circle cx="75" cy="90" r="5" stroke="var(--accent)" fill="none" stroke-width="1.5"/>
+          </svg>
+        </div>
+        <div style="padding:24px; border-top:1px solid var(--ink);">
+          <div style="font-family: var(--mono); font-size:11px; letter-spacing:0.16em; color: var(--muted);">01</div>
+          <div style="font-family: var(--serif); font-weight:300; font-size:28px; line-height:1.1; margin-top:6px;">현장 <span style="font-style:italic">직무</span></div>
+          <div style="font-size:16px; color: var(--ink-2); line-height:1.4; margin-top:10px;">도구를 정확하게 다루고 현장 문제를 해결하는 실무 능력</div>
+        </div>
+      </div>
+
+      <div style="border:1px solid var(--ink); display:flex; flex-direction:column; overflow:hidden;" data-anim="up" style="--anim-delay: 800ms;">
+        <div style="flex:1; background: var(--paper-2); display:flex; align-items:center; justify-content:center; padding:32px;">
+          <svg viewBox="0 0 120 120" fill="none" stroke="var(--ink)" stroke-width="1.2" style="width:100%; max-height:140px;">
+            <circle cx="40" cy="55" r="18" stroke-dasharray="4 3"/>
+            <circle cx="80" cy="55" r="18" stroke-dasharray="4 3"/>
+            <circle cx="60" cy="80" r="18" stroke-dasharray="4 3"/>
+            <path d="M55 50 L65 50 M55 60 L65 60" stroke="var(--accent)" stroke-width="1.8"/>
+            <circle cx="60" cy="55" r="6" fill="var(--accent)" opacity="0.15" stroke="var(--accent)" stroke-width="1.5"/>
+          </svg>
+        </div>
+        <div style="padding:24px; border-top:1px solid var(--ink);">
+          <div style="font-family: var(--mono); font-size:11px; letter-spacing:0.16em; color: var(--muted);">02</div>
+          <div style="font-family: var(--serif); font-weight:300; font-size:28px; line-height:1.1; margin-top:6px;">창의 · <span style="font-style:italic">융합</span></div>
+          <div style="font-size:16px; color: var(--ink-2); line-height:1.4; margin-top:10px;">디지털 도구와 다학문적 관점으로 새로운 아이디어를 제시</div>
+        </div>
+      </div>
+
+      <div style="border:1px solid var(--ink); display:flex; flex-direction:column; overflow:hidden;" data-anim="up" style="--anim-delay: 1000ms;">
+        <div style="flex:1; background: var(--paper-2); display:flex; align-items:center; justify-content:center; padding:32px;">
+          <svg viewBox="0 0 120 120" fill="none" stroke="var(--ink)" stroke-width="1.2" style="width:100%; max-height:140px;">
+            <circle cx="40" cy="50" r="12"/>
+            <circle cx="80" cy="50" r="12"/>
+            <path d="M52 50 C58 42, 68 42, 68 50" stroke="var(--accent)" stroke-width="1.5"/>
+            <path d="M52 50 C58 58, 68 58, 68 50" stroke="var(--accent)" stroke-width="1.5"/>
+            <path d="M35 68 Q60 95, 85 68" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="4 3"/>
+            <circle cx="60" cy="88" r="4" fill="var(--accent)" opacity="0.3" stroke="var(--accent)"/>
+          </svg>
+        </div>
+        <div style="padding:24px; border-top:1px solid var(--ink);">
+          <div style="font-family: var(--mono); font-size:11px; letter-spacing:0.16em; color: var(--muted);">03</div>
+          <div style="font-family: var(--serif); font-weight:300; font-size:28px; line-height:1.1; margin-top:6px;">소통 · <span style="font-style:italic">공감</span></div>
+          <div style="font-size:16px; color: var(--ink-2); line-height:1.4; margin-top:10px;">타인의 관점을 존중하며 긍정적 관계를 형성하는 소통 능력</div>
+        </div>
+      </div>
+
+      <div style="border:1px solid var(--ink); display:flex; flex-direction:column; overflow:hidden;" data-anim="up" style="--anim-delay: 1200ms;">
+        <div style="flex:1; background: var(--paper-2); display:flex; align-items:center; justify-content:center; padding:32px;">
+          <svg viewBox="0 0 120 120" fill="none" stroke="var(--ink)" stroke-width="1.2" style="width:100%; max-height:140px;">
+            <path d="M30 85 L50 55 L70 65 L90 35" stroke="var(--accent)" stroke-width="2"/>
+            <circle cx="30" cy="85" r="4" fill="var(--accent)"/>
+            <circle cx="50" cy="55" r="4" fill="var(--accent)"/>
+            <circle cx="70" cy="65" r="4" fill="var(--accent)"/>
+            <circle cx="90" cy="35" r="4" fill="var(--accent)"/>
+            <path d="M85 40 L90 35 L95 42" stroke="var(--accent)" stroke-width="1.5"/>
+          </svg>
+        </div>
+        <div style="padding:24px; border-top:1px solid var(--ink);">
+          <div style="font-family: var(--mono); font-size:11px; letter-spacing:0.16em; color: var(--muted);">04</div>
+          <div style="font-family: var(--serif); font-weight:300; font-size:28px; line-height:1.1; margin-top:6px;">자기 <span style="font-style:italic">계발</span></div>
+          <div style="font-size:16px; color: var(--ink-2); line-height:1.4; margin-top:10px;">변화하는 환경에 맞춰 스스로 목표를 설정하고 역량을 관리</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div style="font-family: Pretendard">Part 4 · 핵심역량</div>
+    <div class="pageno">21</div>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- 22 / DEPARTMENT — 결과 중심 학습 강조, 균등 박스 -->
+<!-- ===================================================================== -->
+<section class="s-future">
+  <div class="frame"></div>
+  <div class="meta">
+    <div class="l" style="font-family: Pretendard"><span class="dot"></span>Part 4 / Our Way</div>
+    <div class="r" style="font-family: Pretendard">경남정보대학교 인테리어디자인과</div>
+  </div>
+
+  <div class="body">
+    <div class="kicker" style="font-family: Pretendard" data-anim="up"><span class="num">04 · 3</span>우리 학과는 이렇게 다릅니다</div>
+    <h2 data-anim="up" style="margin-top:36px;"><span class="em">결과 먼저,</span> 도구는 그 다음.</h2>
+
+    <div class="skill-grid" style="margin-top:36px;">
+      <div class="skill-card" data-anim="up" style="--anim-delay: 600ms;">
+        <div class="sk-icon">
+          <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        </div>
+        <div class="sk-num" style="font-family: Pretendard">OUTCOME-FIRST</div>
+        <div class="sk-title">결과 중심 <span style="font-style:italic">학습</span></div>
+        <div class="sk-desc">AI로 완성도 높은 결과물을 먼저 경험합니다. 학습의 즐거움이 기술적 고통을 압도하는 역방향 학습.</div>
+        <div class="sk-tag">오늘 체험한 방식</div>
+      </div>
+
+      <div class="skill-card" data-anim="up" style="--anim-delay: 800ms;">
+        <div class="sk-icon">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        </div>
+        <div class="sk-num" style="font-family: Pretendard">A.I WORKFLOW</div>
+        <div class="sk-title">AI 증강 <span style="font-style:italic">워크플로우</span></div>
+        <div class="sk-desc">구상부터 시각화까지 전 과정을 AI로 지능화. 10종 실전 도구를 완벽히 마스터합니다.</div>
+        <div class="sk-tag">생산성 압도</div>
+      </div>
+
+      <div class="skill-card" data-anim="up" style="--anim-delay: 1000ms;">
+        <div class="sk-icon">
+          <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        </div>
+        <div class="sk-num" style="font-family: Pretendard">HYPER-LOCAL PBL</div>
+        <div class="sk-title">현장 밀착 <span style="font-style:italic">프로젝트</span></div>
+        <div class="sk-desc">인근 상권 대상 'A.I 디자인 앰뷸런스' 등 실제 현장에서 성공 경험을 쌓습니다.</div>
+        <div class="sk-tag">실전 포트폴리오</div>
+      </div>
+
+      <div class="skill-card" data-anim="up" style="--anim-delay: 1200ms;">
+        <div class="sk-icon">
+          <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <div class="sk-num" style="font-family: Pretendard">MICRO DEGREE</div>
+        <div class="sk-title">마이크로 <span style="font-style:italic">디그리</span></div>
+        <div class="sk-desc">A.I 공간 시각화 특화 인증(12학점). 졸업과 동시에 AI 전문성을 공식 증명합니다.</div>
+        <div class="sk-tag">차별화된 경쟁력</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div style="font-family: Pretendard">Part 4 · 교육 철학</div>
+    <div class="pageno">22</div>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- 23 / GROWTH JOURNEY — 능력 성장 다이어그램 -->
+<!-- ===================================================================== -->
+<section class="s-future">
+  <div class="frame"></div>
+  <div class="meta">
+    <div class="l" style="font-family: Pretendard"><span class="dot"></span>Part 4 / Growth</div>
+    <div class="r" style="font-family: Pretendard">2-YEAR JOURNEY</div>
+  </div>
+
+  <div class="body">
+    <div class="kicker" style="font-family: Pretendard" data-anim="up"><span class="num">04 · 4</span>2년 후, 이런 사람이 됩니다</div>
+    <h2 data-anim="up" style="margin-top:36px;">입학에서 실무까지, <span class="em">4학기</span> 성장기.</h2>
+
+    <div style="margin-top:48px; position:relative; flex:1; display:flex; flex-direction:column; justify-content:center;">
+      <!-- Timeline bar -->
+      <div style="position:relative; height:4px; background: var(--line); margin:0 60px; border-radius:2px;" data-anim="fade">
+        <div style="position:absolute; left:0; top:0; height:100%; width:100%; background: linear-gradient(90deg, var(--paper-3), var(--accent)); border-radius:2px;"></div>
+      </div>
+
+      <!-- 4 semester nodes -->
+      <div style="display:grid; grid-template-columns: repeat(4,1fr); gap:0; margin-top:-28px; padding:0 20px;">
+
+        <div style="text-align:center; padding:0 16px;" data-anim="up" style="--anim-delay: 500ms;">
+          <div style="width:52px; height:52px; border-radius:50%; background: var(--paper); border:2px solid var(--ink); margin:0 auto; display:flex; align-items:center; justify-content:center; font-family: var(--serif); font-style:italic; font-size:22px; position:relative; z-index:2;">1</div>
+          <div style="margin-top:20px; padding:24px 18px; border:1px solid var(--ink); background: var(--paper); min-height:220px; display:flex; flex-direction:column; gap:16px;">
+            <div style="font-family: var(--mono); font-size:11px; letter-spacing:0.14em; color: var(--muted);">1-1 · 기초 입문</div>
+            <div style="font-family: var(--serif); font-weight:300; font-size:24px; line-height:1.3;"><span style="font-style:italic; color: var(--accent);">발견</span>하는 학기</div>
+            <div style="font-size:15px; color: var(--ink-2); line-height:1.7; flex:1;">공간을 보는 눈을 키우고, AI를 처음 만나 "나도 할 수 있다"는 자신감을 얻습니다</div>
+            <div style="font-family: var(--mono); font-size:10px; letter-spacing:0.1em; color: var(--accent); border-top:1px solid var(--line); padding-top:10px;">드로잉 · 2D CAD · AI 탐험</div>
+          </div>
+        </div>
+
+        <div style="text-align:center; padding:0 16px;" data-anim="up" style="--anim-delay: 750ms;">
+          <div style="width:52px; height:52px; border-radius:50%; background: var(--paper); border:2px solid var(--ink); margin:0 auto; display:flex; align-items:center; justify-content:center; font-family: var(--serif); font-style:italic; font-size:22px; position:relative; z-index:2;">2</div>
+          <div style="margin-top:20px; padding:24px 18px; border:1px solid var(--ink); background: var(--paper); min-height:220px; display:flex; flex-direction:column; gap:16px;">
+            <div style="font-family: var(--mono); font-size:11px; letter-spacing:0.14em; color: var(--muted);">1-2 · 주거 실무</div>
+            <div style="font-family: var(--serif); font-weight:300; font-size:24px; line-height:1.3;"><span style="font-style:italic; color: var(--accent);">만드는</span> 학기</div>
+            <div style="font-size:15px; color: var(--ink-2); line-height:1.7; flex:1;">실제 주거 공간을 설계하고 3D로 구현하며 AI 시각화를 실전에 적용합니다</div>
+            <div style="font-family: var(--mono); font-size:10px; letter-spacing:0.1em; color: var(--accent); border-top:1px solid var(--line); padding-top:10px;">3D 모델링 · 시공 · AI 시각화</div>
+          </div>
+        </div>
+
+        <div style="text-align:center; padding:0 16px;" data-anim="up" style="--anim-delay: 1000ms;">
+          <div style="width:52px; height:52px; border-radius:50%; background: var(--ink); border:2px solid var(--ink); margin:0 auto; display:flex; align-items:center; justify-content:center; font-family: var(--serif); font-style:italic; font-size:22px; color: var(--paper); position:relative; z-index:2;">3</div>
+          <div style="margin-top:20px; padding:24px 18px; border:1px solid var(--ink); background: var(--paper); min-height:220px; display:flex; flex-direction:column; gap:16px;">
+            <div style="font-family: var(--mono); font-size:11px; letter-spacing:0.14em; color: var(--muted);">2-1 · 상업 고도화</div>
+            <div style="font-family: var(--serif); font-weight:300; font-size:24px; line-height:1.3;"><span style="font-style:italic; color: var(--accent);">깊어지는</span> 학기</div>
+            <div style="font-size:15px; color: var(--ink-2); line-height:1.7; flex:1;">브랜드 공간을 기획하고 법규·시공까지 다루며 전문가 수준의 AI 시각화를 익힙니다</div>
+            <div style="font-family: var(--mono); font-size:10px; letter-spacing:0.1em; color: var(--accent); border-top:1px solid var(--line); padding-top:10px;">상업 설계 · 법규 · AI 심화</div>
+          </div>
+        </div>
+
+        <div style="text-align:center; padding:0 16px;" data-anim="up" style="--anim-delay: 1250ms;">
+          <div style="width:52px; height:52px; border-radius:50%; background: var(--accent); border:2px solid var(--accent); margin:0 auto; display:flex; align-items:center; justify-content:center; font-family: var(--serif); font-style:italic; font-size:22px; color: var(--paper); position:relative; z-index:2;">4</div>
+          <div style="margin-top:20px; padding:24px 18px; border:1px solid var(--ink); background: var(--paper); min-height:220px; display:flex; flex-direction:column; gap:16px;">
+            <div style="font-family: var(--mono); font-size:11px; letter-spacing:0.14em; color: var(--muted);">2-2 · 통합·취업</div>
+            <div style="font-family: var(--serif); font-weight:300; font-size:24px; line-height:1.3;"><span style="font-style:italic; color: var(--accent);">증명하는</span> 학기</div>
+            <div style="font-size:15px; color: var(--ink-2); line-height:1.7; flex:1;">캡스톤 프로젝트로 포트폴리오를 완성하고, 마이크로 디그리를 취득하며 취업에 도전합니다</div>
+            <div style="font-family: var(--mono); font-size:10px; letter-spacing:0.1em; color: var(--accent); border-top:1px solid var(--line); padding-top:10px;">캡스톤 · VR/AR · 포트폴리오</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div style="font-family: Pretendard">Part 4 · 성장 로드맵</div>
+    <div class="pageno">23</div>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- 24 / CLOSING (이전 25번, 24번 진로 삭제) -->
+<!-- ===================================================================== -->
+<section class="s-closing">
+  <div class="frame"></div>
+  <div class="meta">
+    <div class="l" style="font-family: Pretendard"><span class="dot"></span>Closing</div>
+    <div class="r" style="font-family: Pretendard">THANK YOU</div>
+  </div>
+
+  <div class="body">
+    <div class="quotemark" style="font-family: var(--serif); font-style:italic; font-weight:300; font-size:240px; line-height:0.6; color: var(--accent-3); margin-bottom:0;" data-anim="fade">"</div>
+    <h2 data-anim="up" style="margin-top:-30px;">오늘 여러분이 고른<br>그 <span class="em">단어</span> 하나가,<br>미래의 <span class="em">첫 설계</span>입니다.</h2>
+    <div class="close-sub" data-anim="up" style="--anim-delay: 500ms;">
+      단어로 공간을 만드는 경험, 기억해주세요.<br>
+      더 깊이 배우고 싶다면, 경남정보대학교 인테리어디자인과에서 기다리겠습니다.
+    </div>
+
+    <div class="close-info" data-anim="up" style="--anim-delay: 900ms;">
+      <div class="col">
+        <span class="label" style="font-family: Pretendard">Department</span>
+        <span class="val" style="font-family: Pretendard">인테리어디자인과</span>
+      </div>
+      <div class="col">
+        <span class="label" style="font-family: Pretendard">University</span>
+        <span class="val" style="font-family: Pretendard">경남정보대학교</span>
+      </div>
+      <div class="col">
+        <span class="label" style="font-family: Pretendard">Contact</span>
+        <span class="val" style="font-family: Pretendard">입학처 문의</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div style="font-family: Pretendard">AI 공간 디렉터 · 단어가 공간을 만든다</div>
+    <div class="pageno" style="color: var(--paper);">24</div>
+  </div>
+</section>
+
+</deck-stage>
+
+<script>
+(function(){
+  // ---- slide 3 : opening question chips ----
+  var STORE_KEY = 'aispacedir.student-words.v1';
+
+  function loadStoredWords(){
+    try{
+      var raw = localStorage.getItem(STORE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    }catch(e){ return []; }
+  }
+  function saveStoredWords(arr){
+    try{ localStorage.setItem(STORE_KEY, JSON.stringify(arr)); }catch(e){}
+  }
+
+  function renderStudentCallback(){
+    var wrap = document.getElementById('student-callback');
+    var chips = document.getElementById('student-callback-chips');
+    if(!wrap || !chips) return;
+    var words = loadStoredWords();
+    chips.innerHTML = '';
+    if(!words.length){
+      wrap.style.display = 'none';
+      return;
+    }
+    wrap.style.display = 'flex';
+    words.forEach(function(w){
+      var c = document.createElement('span');
+      c.style.cssText = 'font-family: var(--sans); font-size: 18px; font-weight: 500; padding: 6px 14px; background: var(--paper-2); border: 1px solid var(--ink); border-radius: 999px;';
+      c.textContent = w;
+      chips.appendChild(c);
+    });
+  }
+
+  function bindQ(){
+    var input = document.getElementById('student-word');
+    var btn = document.getElementById('add-word');
+    var row = document.getElementById('chip-row');
+    if(!input || !btn || !row) return;
+
+    // restore previously stored words on load
+    var stored = loadStoredWords();
+    stored.forEach(function(v){
+      var c = document.createElement('span');
+      c.className = 'chip live';
+      c.textContent = v;
+      row.appendChild(c);
+    });
+
+    function add(){
+      var v = (input.value||'').trim();
+      if(!v) return;
+      var c = document.createElement('span');
+      c.className = 'chip live';
+      c.textContent = v;
+      row.appendChild(c);
+      var arr = loadStoredWords();
+      arr.push(v);
+      saveStoredWords(arr);
+      input.value = '';
+      input.focus();
+      // re-render slide 16 callback in case user already navigated
+      renderStudentCallback();
+    }
+    btn.addEventListener('click', add);
+    input.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); add(); }});
+  }
+
+  // ---- slide 9 : substep click reveal ----
+  function bindSubsteps(){
+    var slide = document.querySelector('section.s-replace');
+    if(!slide) return;
+    slide.dataset.step = '0';
+    slide.style.cursor = 'pointer';
+    function advance(){
+      var s = parseInt(slide.dataset.step || '0', 10);
+      if(s < 2){
+        slide.dataset.step = String(s + 1);
+        return true;
+      }
+      return false;
+    }
+    function reset(){
+      slide.dataset.step = '0';
+    }
+    // click anywhere on the slide
+    slide.addEventListener('click', function(e){
+      // ignore clicks on inputs/buttons/links/text fields
+      var t = e.target;
+      if(t && t.closest && t.closest('input, button, a, textarea')) return;
+      if(advance()){
+        e.stopPropagation();
+      }
+    });
+    // also listen for Space key when this slide is active
+    document.addEventListener('keydown', function(e){
+      if(!slide.classList.contains('is-active')) return;
+      if(e.key === ' ' || e.code === 'Space'){
+        if(advance()){
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      }
+    }, true);
+
+    // reset substep when leaving slide
+    window.addEventListener('message', function(e){
+      if(e.data && typeof e.data.slideIndexChanged === 'number'){
+        // slide 9 (0-indexed = 8)
+        if(e.data.slideIndexChanged !== 8){
+          reset();
+        }
+      }
+    });
+  }
+
+  // ---- slide 14 : process flow animation on view ----
+  function animateFlow(){
+    var flow = document.getElementById('flow');
+    var arrows = document.getElementById('arrows');
+    if(!flow) return;
+    var steps = flow.querySelectorAll('.step');
+    var arrs = arrows ? arrows.querySelectorAll('.a') : [];
+    // pre-hide for animation entrance
+    steps.forEach(function(s){ s.classList.add('pre'); s.classList.remove('in'); });
+    arrs.forEach(function(a){ a.classList.add('pre'); a.classList.remove('in'); });
+    // schedule reveal
+    steps.forEach(function(s, i){
+      setTimeout(function(){ s.classList.remove('pre'); s.classList.add('in'); }, 220 + i*420);
+      if(i < arrs.length){
+        setTimeout(function(){ arrs[i].classList.remove('pre'); arrs[i].classList.add('in'); }, 220 + i*420 + 280);
+      }
+    });
+  }
+
+  // observe slide changes via deck-stage postMessage
+  window.addEventListener('message', function(e){
+    if(e.data && typeof e.data.slideIndexChanged === 'number'){
+      setActiveSlide(e.data.slideIndexChanged);
+      // slide 14 (process) is index 13
+      if(e.data.slideIndexChanged === 13){
+        animateFlow();
+      }
+      // slide 16 (recap) is index 15 — refresh student callback
+      if(e.data.slideIndexChanged === 15){
+        renderStudentCallback();
+      }
+    }
+  });
+
+  // generic per-slide active class — drives [data-anim] reveals
+  function setActiveSlide(idx){
+    var sections = document.querySelectorAll('deck-stage > section');
+    sections.forEach(function(s, i){
+      s.classList.toggle('is-active', i === idx);
+    });
+  }
+
+  // also fire when DOM ready in case starting on that slide
+  document.addEventListener('DOMContentLoaded', function(){
+    bindQ();
+    bindSubsteps();
+    // delay for deck-stage to mount
+    setTimeout(function(){
+      // mark current slide active based on URL hash (deck-stage uses ?slide= or #slide=)
+      var sections = document.querySelectorAll('deck-stage > section');
+      var idx = 0;
+      var m = (location.hash + location.search).match(/(?:slide|s)=?(\d+)/i);
+      if(m){ idx = Math.max(0, Math.min(sections.length - 1, parseInt(m[1], 10))); }
+      setActiveSlide(idx);
+      animateFlow();
+      renderStudentCallback();
+    }, 600);
+  });
+
+  // bind chips immediately too (handles re-entry)
+  setTimeout(bindQ, 200);
+  setTimeout(bindQ, 1200);
+})();
+</script>
+
+</body>
+</html>
