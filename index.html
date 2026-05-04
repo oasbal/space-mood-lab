@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Space Mood Lab</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f4efe8; --bg2: #ebe4d8; --bg3: #e0d6c4;
+    --ink: #1a1a1a; --ink2: #2b2b2b; --muted: #8a8275;
+    --accent: #c8462c; --sage: #2d4a3e; --oak: #d4a574;
+    --line: rgba(26,26,26,0.15);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 15px; }
+  body { font-family: "Pretendard", -apple-system, sans-serif; background: var(--bg); color: var(--ink); min-height: 100vh; }
+
+  /* ─── Header ─── */
+  .header { padding: 28px 40px 20px; border-bottom: 1px solid var(--line); }
+  .header .eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+  .header h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; }
+
+  /* ─── Screens ─── */
+  .screen { display: none; animation: fadeIn .35s ease; }
+  .screen.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ─── Home Screen ─── */
+  .home { padding: 60px 40px; max-width: 700px; margin: 0 auto; text-align: center; }
+  .home h2 { font-size: 32px; font-weight: 700; margin-bottom: 12px; letter-spacing: -0.02em; }
+  .home .home-desc { font-size: 15px; color: var(--muted); line-height: 1.7; margin-bottom: 40px; }
+  .mode-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .mode-card {
+    border: 2px solid var(--line); background: var(--bg2); border-radius: 16px;
+    padding: 36px 28px; cursor: pointer; transition: all .2s; text-align: center;
+  }
+  .mode-card:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: 0 6px 24px rgba(0,0,0,0.06); }
+  .mode-card .mc-icon { font-size: 48px; margin-bottom: 16px; }
+  .mode-card .mc-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+  .mode-card .mc-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+  .mode-card .mc-tag {
+    display: inline-block; margin-top: 14px; padding: 5px 14px; border-radius: 999px;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.06em;
+  }
+  .mode-card:first-child .mc-tag { background: rgba(200,70,44,0.1); color: var(--accent); }
+  .mode-card:last-child .mc-tag { background: rgba(45,74,62,0.1); color: var(--sage); }
+
+  /* ─── Progress Bar ─── */
+  .progress-wrap { padding: 20px 40px 0; }
+  .progress-steps { display: flex; align-items: center; }
+  .prog-step { display: flex; align-items: center; flex: 1; }
+  .prog-step:last-child { flex: 0; }
+  .prog-dot {
+    width: 32px; height: 32px; border-radius: 50%; background: var(--bg3); color: var(--muted);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; flex-shrink: 0; transition: all .3s; z-index: 2;
+  }
+  .prog-dot.active { background: var(--accent); color: #fff; box-shadow: 0 2px 12px rgba(200,70,44,0.3); }
+  .prog-dot.done { background: var(--sage); color: #fff; }
+  .prog-line { flex: 1; height: 2px; background: var(--line); margin: 0 4px; }
+  .prog-line.done { background: var(--sage); }
+  .prog-labels { display: flex; margin-top: 8px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+  .prog-label { flex: 1; font-size: 10px; font-weight: 500; color: var(--muted); text-align: center; transition: color .3s; }
+  .prog-label:last-child { flex: 0; min-width: 32px; }
+  .prog-label.active { color: var(--accent); font-weight: 700; }
+  .prog-label.done { color: var(--sage); }
+
+  /* ─── Step Pages ─── */
+  .main { padding: 0 40px; }
+  .step-page { display: none; animation: fadeIn .35s ease; padding: 32px 0 120px; max-width: 800px; }
+  .step-page.active { display: block; }
+  .step-question { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.35; margin-bottom: 12px; }
+  .step-explain { font-size: 14px; line-height: 1.7; color: var(--muted); margin-bottom: 28px; max-width: 600px; }
+  .step-explain strong { color: var(--ink2); font-weight: 600; }
+  .step-explain .highlight { color: var(--accent); font-weight: 600; }
+  .tip-box { background: var(--bg2); border-left: 3px solid var(--oak); padding: 14px 18px; border-radius: 0 8px 8px 0; margin-bottom: 24px; font-size: 13px; color: var(--ink2); line-height: 1.6; }
+  .tip-box .tip-label { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; color: var(--oak); margin-bottom: 4px; text-transform: uppercase; }
+
+  /* ─── Mission Brief (banner) ─── */
+  .mission-brief {
+    background: var(--ink); color: #fff; border-radius: 12px; padding: 18px 22px; margin-bottom: 24px;
+    display: flex; align-items: flex-start; gap: 14px;
+  }
+  .mission-brief .mb-icon { font-size: 28px; flex-shrink: 0; }
+  .mission-brief .mb-text { flex: 1; }
+  .mission-brief .mb-client { font-size: 13px; color: var(--oak); font-weight: 600; margin-bottom: 4px; }
+  .mission-brief .mb-req { font-size: 14px; color: rgba(255,255,255,0.85); line-height: 1.5; }
+  .mission-brief .mb-must { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 6px; }
+
+  /* ─── Space Cards ─── */
+  .space-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .space-card { border: 2px solid var(--line); background: var(--bg2); border-radius: 14px; overflow: hidden; cursor: pointer; transition: all .2s; }
+  .space-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+  .space-card.selected { border-color: var(--accent); background: #fff; }
+  .space-card .card-img { width: 100%; aspect-ratio: 16/9; background: var(--bg3); display: flex; align-items: center; justify-content: center; border-bottom: 1px solid var(--line); overflow: hidden; }
+  .space-card .card-img img { width: 100%; height: 100%; object-fit: cover; }
+  .space-card .card-body { padding: 16px 18px; }
+  .space-card .card-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+  .space-card .card-title .check { width: 20px; height: 20px; border-radius: 50%; background: var(--accent); color: #fff; display: none; align-items: center; justify-content: center; font-size: 12px; }
+  .space-card.selected .card-title .check { display: flex; }
+  .space-card .card-desc { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+  /* ─── Chips ─── */
+  .chip-section { margin-bottom: 24px; }
+  .chip-section-label { font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--sage); margin-bottom: 10px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { padding: 10px 20px; border-radius: 999px; font-size: 14px; font-weight: 500; border: 1.5px solid var(--line); background: transparent; color: var(--ink2); cursor: pointer; transition: all .15s; user-select: none; }
+  .chip:hover { border-color: var(--accent); color: var(--accent); }
+  .chip.on { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 2px 8px rgba(200,70,44,0.2); }
+  .chips-rich { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .chip-rich { padding: 14px 18px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--bg2); cursor: pointer; transition: all .15s; user-select: none; }
+  .chip-rich:hover { border-color: var(--accent); }
+  .chip-rich.on { background: var(--accent); border-color: var(--accent); box-shadow: 0 2px 12px rgba(200,70,44,0.15); }
+  .chip-rich .cr-name { font-size: 15px; font-weight: 600; margin-bottom: 3px; color: var(--ink); transition: color .15s; }
+  .chip-rich.on .cr-name { color: #fff; }
+  .chip-rich .cr-desc { font-size: 12px; line-height: 1.45; color: var(--muted); transition: color .15s; }
+  .chip-rich.on .cr-desc { color: rgba(255,255,255,0.75); }
+  .chip-color { padding: 14px 18px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--bg2); cursor: pointer; transition: all .15s; user-select: none; display: flex; align-items: center; gap: 14px; }
+  .chip-color:hover { border-color: var(--accent); }
+  .chip-color.on { background: var(--accent); border-color: var(--accent); box-shadow: 0 2px 12px rgba(200,70,44,0.15); }
+  .chip-color .swatch { display: flex; gap: 3px; flex-shrink: 0; }
+  .chip-color .swatch-dot { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid rgba(0,0,0,0.08); }
+  .chip-color .cr-text { flex: 1; }
+  .chip-color .cr-name { font-size: 15px; font-weight: 600; margin-bottom: 2px; color: var(--ink); transition: color .15s; }
+  .chip-color.on .cr-name { color: #fff; }
+  .chip-color .cr-desc { font-size: 12px; line-height: 1.4; color: var(--muted); transition: color .15s; }
+  .chip-color.on .cr-desc { color: rgba(255,255,255,0.75); }
+  .chip-color.on .swatch-dot { border-color: rgba(255,255,255,0.3); }
+
+  /* ─── Compatibility Stars ─── */
+  .compat { display: inline-block; font-size: 11px; letter-spacing: 1px; margin-left: 6px; white-space: nowrap; }
+  .compat.s3 { color: var(--accent); }
+  .compat.s2 { color: var(--oak); }
+  .compat.s1 { color: var(--muted); opacity: 0.5; }
+  .chip-rich.on .compat, .chip-color.on .compat { color: rgba(255,255,255,0.7); opacity: 1; }
+  .compat-notice { font-size: 12px; color: var(--muted); line-height: 1.6; margin-bottom: 16px; padding: 10px 14px; background: rgba(200,70,44,0.04); border-radius: 8px; }
+  .compat-notice strong { color: var(--accent); }
+
+  /* ─── Image Upload ─── */
+  .upload-area { border: 2px dashed var(--line); border-radius: 14px; padding: 32px; text-align: center; cursor: pointer; transition: all .2s; background: var(--bg2); margin-bottom: 24px; }
+  .upload-area:hover { border-color: var(--sage); background: rgba(45,74,62,0.04); }
+  .upload-area.has-image { border-style: solid; border-color: var(--sage); padding: 0; overflow: hidden; cursor: default; }
+  .upload-area .ua-icon { font-size: 40px; margin-bottom: 12px; }
+  .upload-area .ua-title { font-size: 15px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+  .upload-area .ua-hint { font-size: 12px; color: var(--muted); }
+  .upload-area img { width: 100%; display: block; }
+  .upload-area .ua-bar { padding: 12px 18px; border-top: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; }
+  .upload-area .ua-bar .ua-label { font-size: 13px; font-weight: 600; color: var(--sage); }
+  .upload-area .ua-bar .ua-change { font-size: 12px; color: var(--accent); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+
+  /* ─── Submit Section ─── */
+  .submit-section { margin-top: 28px; padding: 24px; border: 2px solid var(--sage); border-radius: 16px; background: rgba(45,74,62,0.04); }
+  .submit-section h3 { font-size: 18px; font-weight: 700; color: var(--sage); margin-bottom: 16px; }
+  .team-name-row { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; }
+  .team-name-input { flex: 1; padding: 12px 16px; border: 1.5px solid var(--line); border-radius: 10px; font-size: 15px; font-family: inherit; color: var(--ink); background: #fff; }
+  .team-name-input:focus { outline: none; border-color: var(--sage); box-shadow: 0 0 0 3px rgba(45,74,62,0.1); }
+  .btn-submit { padding: 12px 32px; border-radius: 10px; font-size: 15px; font-weight: 700; font-family: inherit; border: none; cursor: pointer; background: var(--sage); color: #fff; transition: all .15s; min-width: 100px; }
+  .btn-submit:hover { background: #1f3a2f; }
+  .btn-submit:disabled { background: var(--bg3); color: var(--muted); cursor: not-allowed; }
+  .btn-submit.submitted { background: var(--accent); }
+  .submit-status { font-size: 13px; color: var(--muted); margin-top: 8px; }
+
+  /* ─── Visual Cards ─── */
+  .visual-options { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .visual-card { border: 2px solid var(--line); border-radius: 14px; padding: 28px 24px; cursor: pointer; transition: all .2s; text-align: center; background: var(--bg2); }
+  .visual-card:hover { border-color: var(--accent); }
+  .visual-card.selected { border-color: var(--accent); background: #fff; }
+  .visual-card .v-icon { font-size: 48px; margin-bottom: 12px; }
+  .visual-card .v-title { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+  .visual-card .v-desc { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+  /* ─── Summary / Final ─── */
+  .base-img-preview { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; margin-bottom: 24px; background: var(--bg2); }
+  .base-img-preview img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
+  .base-img-preview .bip-bar { padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--line); }
+  .base-img-preview .bip-info { display: flex; align-items: center; gap: 10px; }
+  .base-img-preview .bip-label { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); }
+  .base-img-preview .bip-name { font-size: 16px; font-weight: 700; color: var(--ink); }
+  .save-hint { font-size: 13px; color: var(--sage); font-weight: 600; }
+  .summary-card { background: var(--ink); color: #fff; border-radius: 16px; padding: 32px; margin-bottom: 24px; }
+  .summary-title { font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--oak); margin-bottom: 16px; }
+  .summary-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .summary-row:last-child { border-bottom: none; }
+  .summary-cat { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.45); letter-spacing: 0.06em; min-width: 100px; }
+  .summary-val { font-size: 15px; font-weight: 500; color: rgba(255,255,255,0.9); text-align: right; }
+  .summary-val.empty { color: rgba(255,255,255,0.2); font-style: italic; }
+  .prompt-box { background: var(--bg2); border: 1px solid var(--line); border-radius: 12px; padding: 20px 24px; margin-bottom: 16px; }
+  .prompt-label { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+  .prompt-text { font-size: 15px; line-height: 1.7; color: var(--ink); word-break: keep-all; min-height: 24px; }
+  .prompt-text:empty::after { content: "키워드를 선택하면 여기에 표시됩니다"; color: var(--muted); }
+  .howto-mini { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 20px; }
+  .howto-card { background: var(--bg2); border-radius: 10px; padding: 18px 16px; text-align: center; }
+  .howto-card .hw-num { width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; margin-bottom: 8px; }
+  .howto-card .hw-text { font-size: 13px; font-weight: 500; line-height: 1.5; color: var(--ink2); }
+
+  /* ─── Mission Card ─── */
+  .mission-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; min-height: 60vh; }
+  .mission-intro { text-align: center; margin-bottom: 32px; }
+  .mission-intro h2 { font-size: 26px; font-weight: 700; margin-bottom: 8px; }
+  .mission-intro p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .card-scene { width: 420px; max-width: 100%; aspect-ratio: 3/4; perspective: 800px; margin-bottom: 28px; }
+  .card-flip { width: 100%; height: 100%; position: relative; transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; }
+  .card-flip.flipped { transform: rotateY(180deg); }
+  .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 20px; overflow: hidden; }
+  .card-back { background: var(--ink); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: box-shadow .3s; }
+  .card-back:hover { box-shadow: 0 8px 40px rgba(0,0,0,0.2); }
+  .card-back .card-logo { font-size: 64px; margin-bottom: 16px; }
+  .card-back .card-label { font-size: 13px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--oak); }
+  .card-back .card-tap { margin-top: 24px; font-size: 13px; color: rgba(255,255,255,0.35); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 0.35; } 50% { opacity: 0.7; } }
+  .card-front { transform: rotateY(180deg); background: #fff; display: flex; flex-direction: column; }
+  .card-front .cf-header { background: var(--sage); padding: 20px 24px; color: #fff; }
+  .card-front .cf-mission-num { font-size: 11px; font-weight: 700; letter-spacing: 0.14em; opacity: 0.7; margin-bottom: 4px; }
+  .card-front .cf-title { font-size: 20px; font-weight: 700; }
+  .card-front .cf-body { flex: 1; padding: 24px; display: flex; flex-direction: column; gap: 16px; overflow-y: auto; }
+  .cf-row { display: flex; gap: 10px; align-items: flex-start; }
+  .cf-row .cf-icon { font-size: 20px; flex-shrink: 0; width: 28px; text-align: center; }
+  .cf-row .cf-content { flex: 1; }
+  .cf-row .cf-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 2px; }
+  .cf-row .cf-value { font-size: 15px; font-weight: 500; color: var(--ink); line-height: 1.5; }
+  .card-front .cf-footer { padding: 16px 24px; border-top: 1px solid var(--line); display: flex; gap: 8px; }
+  .card-front .cf-footer .btn { flex: 1; text-align: center; font-size: 13px; padding: 10px 16px; }
+  .mission-hint { font-size: 13px; color: var(--muted); text-align: center; margin-top: 8px; }
+
+  /* ─── Mission Mode - Textarea Input ─── */
+  .team-input { width: 100%; min-height: 80px; border: 1.5px solid var(--line); border-radius: 12px; padding: 14px 18px; font-size: 14px; font-family: inherit; color: var(--ink); background: #fff; resize: vertical; transition: border-color .2s; line-height: 1.6; }
+  .team-input:focus { outline: none; border-color: var(--sage); box-shadow: 0 0 0 3px rgba(45,74,62,0.1); }
+  .team-input::placeholder { color: var(--muted); }
+  .input-label { font-size: 13px; font-weight: 600; color: var(--ink2); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+  .input-group { margin-bottom: 20px; }
+  .guide-question { background: var(--bg2); border-radius: 12px; padding: 18px 22px; margin-bottom: 16px; border-left: 3px solid var(--sage); }
+  .guide-question .gq-q { font-size: 15px; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
+  .guide-question .gq-hint { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* ─── Constraint Tags ─── */
+  .constraint-tag { display: inline-flex; align-items: center; gap: 4px; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; margin: 3px; }
+  .constraint-tag.required { background: rgba(45,74,62,0.12); color: var(--sage); }
+  .constraint-tag.auto { background: rgba(200,70,44,0.1); color: var(--accent); }
+  .constraint-notice { background: rgba(45,74,62,0.06); border: 1px solid rgba(45,74,62,0.15); border-radius: 10px; padding: 14px 18px; margin-bottom: 20px; font-size: 13px; color: var(--sage); line-height: 1.6; }
+  .constraint-notice strong { font-weight: 700; }
+
+  /* ─── Presentation Card ─── */
+  .present-card { background: #fff; border: 2px solid var(--line); border-radius: 16px; padding: 32px; margin-top: 24px; }
+  .present-card h3 { font-size: 18px; font-weight: 700; margin-bottom: 16px; color: var(--ink); }
+  .present-row { margin-bottom: 14px; }
+  .present-row .pr-label { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sage); margin-bottom: 4px; }
+  .present-row .pr-value { font-size: 15px; color: var(--ink); line-height: 1.6; }
+
+  /* ─── Bottom Nav ─── */
+  .bottom-nav { position: sticky; bottom: 0; background: #fff; border-top: 1px solid var(--line); padding: 16px 40px; display: flex; align-items: center; justify-content: space-between; z-index: 10; }
+  .nav-info { font-size: 13px; color: var(--muted); }
+  .nav-info .chosen { color: var(--accent); font-weight: 600; }
+  .nav-btns { display: flex; gap: 10px; align-items: center; }
+  .btn { padding: 12px 28px; border-radius: 10px; font-size: 14px; font-weight: 600; font-family: inherit; border: none; cursor: pointer; transition: all .15s; }
+  .btn-back { background: var(--bg2); color: var(--ink2); border: 1px solid var(--line); }
+  .btn-back:hover { background: var(--bg3); }
+  .btn-next { background: var(--accent); color: #fff; min-width: 120px; }
+  .btn-next:hover { background: #a83820; }
+  .btn-next.finish { background: var(--sage); }
+  .btn-next.finish:hover { background: #1f3a2f; }
+  .btn-copy2 { background: var(--accent); color: #fff; min-width: 140px; }
+  .btn-copy2:hover { background: #a83820; }
+  .btn-copy2.done { background: var(--sage); }
+  .btn-home { background: var(--bg2); color: var(--ink2); border: 1px solid var(--line); }
+  .btn-home:hover { background: var(--bg3); }
+  .btn-draw { background: var(--bg2); color: var(--ink2); border: 1px solid var(--line); }
+  .btn-draw:hover { background: var(--bg3); }
+  .btn-use { background: var(--sage); color: #fff; }
+  .btn-use:hover { background: #1f3a2f; }
+  .skip-link { font-size: 12px; color: var(--muted); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+  .skip-link:hover { color: var(--accent); }
+
+  /* ─── Responsive ─── */
+  @media (max-width: 700px) {
+    .header, .progress-wrap, .main, .bottom-nav { padding-left: 20px; padding-right: 20px; }
+    .home { padding: 40px 20px; }
+    .mode-cards, .space-cards, .visual-options { grid-template-columns: 1fr; }
+    .chips-rich { grid-template-columns: 1fr; }
+    .howto-mini { grid-template-columns: 1fr 1fr; }
+    .step-question { font-size: 22px; }
+    .prog-label { font-size: 9px; }
+    .prog-dot { width: 26px; height: 26px; font-size: 11px; }
+    .mission-wrap { padding: 24px 20px; }
+    .card-scene { width: 320px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="eyebrow">AI 공간 디렉터 · 경남정보대학교 인테리어디자인과</div>
+  <h1>Space Mood Lab</h1>
+</div>
+
+<!-- ═══ SCREEN: Home (mode select) ═══ -->
+<div class="screen active" id="screen-home">
+  <div class="home">
+    <h2>어떤 방식으로 시작할까요?</h2>
+    <p class="home-desc">AI와 함께 나만의 공간을 디자인해 봅시다.<br>두 가지 모드 중 하나를 선택하세요.</p>
+    <div class="mode-cards">
+      <div class="mode-card" onclick="startMode('free')">
+        <div class="mc-icon">🎨</div>
+        <div class="mc-title">자유 디자인</div>
+        <div class="mc-desc">내가 원하는 스타일, 무드, 조명, 소재를<br>자유롭게 골라서 나만의 공간을 만들어요.</div>
+        <div class="mc-tag">내 취향대로 · 개인</div>
+      </div>
+      <div class="mode-card" onclick="startMode('mission')">
+        <div class="mc-icon">🎯</div>
+        <div class="mc-title">미션 모드</div>
+        <div class="mc-desc">2인 팀으로 클라이언트 의뢰를 받고,<br>분석 → 컨셉 → 디자인 → 발표까지.<br>실제 디자이너의 프로세스를 체험!</div>
+        <div class="mc-tag">디자이너 체험 · 2인 팀</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SCREEN: Mission Card Draw ═══ -->
+<div class="screen" id="screen-mission-draw">
+  <div class="mission-wrap">
+    <div class="mission-intro">
+      <h2>미션 카드 뽑기</h2>
+      <p>실제 인테리어 디자이너는 클라이언트의 요구에 맞춰 디자인합니다.<br>팀원과 함께 카드를 뽑아 의뢰인의 요청을 확인하세요!</p>
+    </div>
+    <div class="card-scene" id="cardScene">
+      <div class="card-flip" id="cardFlip" onclick="drawCard()">
+        <div class="card-face card-back">
+          <div class="card-logo">🏠</div>
+          <div class="card-label">Mission Card</div>
+          <div class="card-tap">탭하여 카드 뽑기</div>
+        </div>
+        <div class="card-face card-front" id="cardFront"></div>
+      </div>
+    </div>
+    <div class="mission-hint" id="missionHint">카드를 탭하면 랜덤 의뢰인이 등장합니다</div>
+  </div>
+</div>
+
+<!-- ═══ SCREEN: Free Design Picker ═══ -->
+<div class="screen" id="screen-free">
+  <div class="progress-wrap">
+    <div class="progress-steps" id="freeProgressSteps"></div>
+    <div class="prog-labels" id="freeProgressLabels"></div>
+  </div>
+  <div class="main">
+    <div class="step-page" id="free-step-0">
+      <div class="step-question">어떤 공간을 꾸며볼까요?</div>
+      <div class="step-explain">인테리어의 시작은 <strong>공간을 이해하는 것</strong>입니다. 같은 가구, 같은 색상이라도 원룸에 놓느냐, 넓은 거실에 놓느냐에 따라 느낌이 완전히 달라져요. <span class="highlight">먼저, AI가 변환할 빈 방을 하나 골라주세요.</span></div>
+      <div class="space-cards" id="freeSpaceCards"></div>
+    </div>
+    <div class="step-page" id="free-step-1">
+      <div class="step-question">이 공간의 스타일은?</div>
+      <div class="step-explain">스타일은 공간의 <strong>정체성</strong>입니다. 하나의 키워드가 벽의 재질, 가구의 형태, 색감까지 모두 결정합니다. <span class="highlight">마음에 드는 스타일을 하나 골라보세요.</span></div>
+      <div class="tip-box"><div class="tip-label">디자이너 Tip</div>실제 인테리어 프로젝트에서도 가장 먼저 결정하는 것이 스타일입니다. 클라이언트가 "따뜻한 느낌"이라고 말하면, 디자이너는 "북유럽? 와비사비? 보헤미안?" 중 어디에 가까운지 파악하죠.</div>
+      <div class="chip-section" id="freeStyleChips"></div>
+    </div>
+    <div class="step-page" id="free-step-2">
+      <div class="step-question">어떤 기분이 드는 공간을 원하나요?</div>
+      <div class="step-explain">같은 "미니멀" 방이라도 <strong>따뜻한 미니멀</strong>과 <strong>차분한 미니멀</strong>은 다릅니다. 무드는 공간에 들어갔을 때 느끼는 <strong>감정</strong>이에요.</div>
+      <div class="tip-box"><div class="tip-label">분위기 연출 예시</div>
+        <strong>따뜻한</strong> → 카페 라떼 색 소파 + 무릎 담요 + 간접 조명<br>
+        <strong>드라마틱</strong> → 어두운 벽 + 스포트 조명 하나 + 금속 소재<br>
+        <strong>몽환적</strong> → 쉬어 커튼 + 라벤더 빛 + 구름 같은 러그<br>
+        <strong>차분한</strong> → 화이트 + 우드 + 아무 소리 없는 고요함
+      </div>
+      <div class="chip-section" id="freeMoodChips"></div>
+    </div>
+    <div class="step-page" id="free-step-3">
+      <div class="step-question">빛은 어떻게 들어올까요?</div>
+      <div class="step-explain">조명은 공간의 <strong>분위기를 70% 결정</strong>합니다. 똑같은 방도 자연광이 가득하면 상쾌하고, 간접조명만 켜면 아늑하죠.</div>
+      <div class="tip-box"><div class="tip-label">조명의 비밀</div>인스타에서 "분위기 좋다"고 느끼는 카페 사진, 대부분 골든아워(해질녘)에 찍은 거예요.</div>
+      <div class="chip-section" id="freeLightChips"></div>
+    </div>
+    <div class="step-page" id="free-step-4">
+      <div class="step-question">어떤 재료와 색감이 좋을까요?</div>
+      <div class="step-explain">소재는 공간의 <strong>촉감</strong>, 색상은 공간의 <strong>온도</strong>입니다. <span class="highlight">소재 하나, 색상 하나를 각각 골라주세요.</span></div>
+      <div class="tip-box"><div class="tip-label">조합의 마법</div>"노출 콘크리트 + 딥 네이비" → 도시적이고 쿨한 느낌. "원목(오크) + 웜 화이트" → 따뜻하고 자연스러운 느낌.</div>
+      <div class="chip-section" id="freeMaterialChips"></div>
+      <div class="chip-section" id="freeColorChips"></div>
+    </div>
+    <div class="step-page" id="free-step-5">
+      <div class="step-question">공간을 채울 것들을 골라볼까요?</div>
+      <div class="step-explain">빈 방에 <strong>가구 하나</strong>가 들어가면 비로소 "공간"이 됩니다. <span class="highlight">핵심 가구 하나, 악세서리 하나를 골라보세요.</span></div>
+      <div class="tip-box"><div class="tip-label">인테리어 디자이너처럼</div>프로 디자이너도 모든 것을 한꺼번에 넣지 않습니다. "이 공간의 주인공"이 될 가구를 먼저 정하고, 나머지를 거기에 맞추죠.</div>
+      <div class="chip-section" id="freeFurnitureChips"></div>
+      <div class="chip-section" id="freeDecoChips"></div>
+    </div>
+    <div class="step-page" id="free-step-6">
+      <div class="step-question">나의 공간 레시피가 완성되었어요!</div>
+      <div class="step-explain">지금까지 고른 키워드들이 합쳐져 하나의 <strong>공간 디자인 지시문</strong>이 되었습니다. 이걸 그대로 Opal 앱에 붙여넣기하면, AI가 여러분의 아이디어를 실제 이미지로 만들어줍니다.</div>
+      <div class="base-img-preview" id="freeBaseImgPreview"></div>
+      <div class="summary-card" id="freeSummaryCard"></div>
+      <div class="prompt-box">
+        <div class="prompt-label">Opal에 붙여넣을 텍스트</div>
+        <div class="prompt-text" id="freePromptText"></div>
+      </div>
+      <div class="howto-mini">
+        <div class="howto-card"><div class="hw-num">1</div><div class="hw-text">위 이미지를<br><strong>다운로드</strong></div></div>
+        <div class="howto-card"><div class="hw-num">2</div><div class="hw-text">키워드 텍스트를<br><strong>복사</strong></div></div>
+        <div class="howto-card"><div class="hw-num">3</div><div class="hw-text">Opal 앱에<br><strong>업로드 + 붙여넣기</strong></div></div>
+        <div class="howto-card"><div class="hw-num">4</div><div class="hw-text"><strong>생성 버튼</strong>을 누르고<br>결과 확인!</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SCREEN: Mission Mode (6-step) ═══ -->
+<div class="screen" id="screen-mission">
+  <div class="progress-wrap">
+    <div class="progress-steps" id="missionProgressSteps"></div>
+    <div class="prog-labels" id="missionProgressLabels"></div>
+  </div>
+  <div class="main">
+    <!-- Mission Step 1: Briefing -->
+    <div class="step-page" id="mission-step-0">
+      <div class="step-question">미션 브리핑</div>
+      <div class="step-explain">팀원과 함께 클라이언트의 요청을 꼼꼼히 읽어보세요. 좋은 디자인은 <strong>클라이언트의 말 속에 숨은 진짜 니즈</strong>를 파악하는 것에서 시작합니다.</div>
+      <div class="mission-brief" id="missionStepBrief"></div>
+      <div class="tip-box"><div class="tip-label">팀 활동</div>팀원과 소리 내어 읽고, "이 사람이 진짜 원하는 건 뭘까?" 이야기해 보세요.</div>
+    </div>
+
+    <!-- Mission Step 2: Analysis -->
+    <div class="step-page" id="mission-step-1">
+      <div class="step-question">클라이언트 분석</div>
+      <div class="step-explain">좋은 디자이너는 바로 스타일을 고르지 않습니다. 먼저 <strong>"왜?"</strong>를 물어요. 팀원과 아래 질문에 대해 이야기하고, 핵심을 적어보세요.</div>
+      <div id="missionAnalysisContent"></div>
+    </div>
+
+    <!-- Mission Step 3: Concept -->
+    <div class="step-page" id="mission-step-2">
+      <div class="step-question">디자인 컨셉 도출</div>
+      <div class="step-explain">분석을 바탕으로 <strong>공간의 방향성</strong>을 정합니다. 팀원과 합의하여 이 공간을 한마디로 표현해보고, 핵심 키워드 2~3개를 골라주세요.</div>
+      <div id="missionConceptContent"></div>
+    </div>
+
+    <!-- Mission Step 4: Design Decisions -->
+    <div class="step-page" id="mission-step-3">
+      <div class="step-question">디자인 결정</div>
+      <div class="step-explain">컨셉에 맞춰 구체적인 요소를 선택합니다. <span class="highlight">미션의 필수 조건에 맞는 항목이 표시됩니다.</span> 나머지는 팀이 자유롭게 결정하세요.</div>
+      <div id="missionDesignContent"></div>
+    </div>
+
+    <!-- Mission Step 5: Prompt Completion -->
+    <div class="step-page" id="mission-step-4">
+      <div class="step-question">프롬프트 완성</div>
+      <div class="step-explain">모든 선택이 조합되어 AI에게 전달할 <strong>공간 디자인 지시문</strong>이 완성되었습니다. Opal 앱에 이 내용을 넣으면 AI가 이미지를 생성합니다.</div>
+      <div id="missionPromptContent"></div>
+    </div>
+
+    <!-- Mission Step 6: Presentation Prep -->
+    <div class="step-page" id="mission-step-5">
+      <div class="step-question">발표 준비</div>
+      <div class="step-explain">실제 디자이너는 결과물을 클라이언트에게 <strong>"왜 이렇게 디자인했는지"</strong> 설명합니다. 아래 질문에 팀의 답을 적어보세요. 이것이 여러분의 발표 스크립트가 됩니다.</div>
+      <div id="missionPresentContent"></div>
+    </div>
+  </div>
+</div>
+
+<div class="bottom-nav" id="bottomNav" style="display:none;">
+  <div class="nav-info" id="navInfo"></div>
+  <div class="nav-btns" id="navBtns"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+//  SETTINGS - 여기에 Apps Script URL을 붙여넣으세요
+// ═══════════════════════════════════════
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby8gvfAIGmnyfDK0gJS32KXQ05PGP0AIMon6Lu5Ilf2JwVzzqykQG1sVvDzFIxR9g8H/exec';
+
+// ═══════════════════════════════════════
+//  DATA
+// ═══════════════════════════════════════
+const spaces = [
+  { id: 'oneroom', name: '원룸', emoji: '🏠', img: 'images/oneroom.png', desc: '베이지 벽, 나무 바닥, 작은 창문. 나의 첫 공간.' },
+  { id: 'living', name: '거실', emoji: '🛋️', img: 'images/living.png', desc: '넓은 공간, 큰 창문, 자연광. 가족이 함께 쓰는 곳.' },
+  { id: 'studio', name: '작업실', emoji: '💻', img: 'images/studio.png', desc: '작은 방, 창문 1개. 나만의 워크스페이스.' },
+  { id: 'cafe', name: '카페', emoji: '☕', img: 'images/cafe.png', desc: '유리 전면, 벽돌 벽, 콘크리트 바닥. 나만의 카페.' },
+];
+const styles = [
+  { name: "미니멀", desc: "꼭 필요한 것만. 깔끔한 선, 여백의 미" },
+  { name: "북유럽", desc: "밝고 따뜻한 나무 + 화이트. IKEA 느낌" },
+  { name: "인더스트리얼", desc: "공장·창고 감성. 철제, 콘크리트, 파이프" },
+  { name: "보헤미안", desc: "자유분방, 패턴·직물·색이 풍부한 히피 감성" },
+  { name: "와비사비", desc: "일본 미학. 불완전함 속의 아름다움, 자연 소재" },
+  { name: "미드센추리 모던", desc: "1950~60년대 디자인. 둥근 곡선, 우드 + 팝 컬러" },
+  { name: "빈티지 레트로", desc: "오래된 것의 매력. 앤틱 가구, 세월의 흔적" },
+  { name: "스칸디나비안", desc: "북유럽의 실용적 버전. 기능 중심, 단순한 형태" },
+];
+const moods = [
+  { name: "따뜻한", desc: "포근하고 편안한 느낌" }, { name: "차분한", desc: "고요하고 안정된 느낌" },
+  { name: "활기찬", desc: "에너지 넘치고 밝은 느낌" }, { name: "몽환적", desc: "꿈속 같은 신비로운 분위기" },
+  { name: "드라마틱", desc: "강렬한 명암 대비, 무대 같은 공간" }, { name: "아늑한", desc: "이불 속 같은 안락함" },
+  { name: "신비로운", desc: "비밀스러운 분위기, 호기심을 자극" }, { name: "로맨틱", desc: "부드럽고 사랑스러운 분위기" },
+  { name: "미래적", desc: "SF 영화 속 같은 첨단 느낌" },
+];
+const lights = [
+  { name: "자연광 가득", desc: "큰 창으로 햇빛이 쏟아지는 낮의 공간" }, { name: "골든아워", desc: "해질녘의 황금빛. 모든 게 예뻐지는 시간" },
+  { name: "웜톤 펜던트", desc: "천장에 매달린 따뜻한 색 조명" }, { name: "스포트 조명", desc: "특정 부분만 비추는 집중 조명" },
+  { name: "간접조명", desc: "벽·천장에 반사시켜 은은하게 퍼지는 빛" }, { name: "네온 사인", desc: "글자·그림 형태의 컬러 조명. 카페·바 감성" },
+  { name: "촛불 분위기", desc: "흔들리는 따뜻한 불빛, 그림자의 움직임" }, { name: "창가 역광", desc: "창 뒤에서 들어와 실루엣이 만들어지는 빛" },
+];
+const materials = [
+  { name: "노출 콘크리트", desc: "마감 안 한 시멘트 벽. 도시적이고 쿨한 느낌" }, { name: "원목(오크)", desc: "밝은 참나무. 자연스럽고 따뜻한 바닥·가구" },
+  { name: "황동", desc: "금빛 금속. 고급스러운 손잡이·조명 디테일" }, { name: "대리석", desc: "하얀 돌에 회색 무늬. 고급 호텔 느낌" },
+  { name: "벽돌", desc: "붉은색 또는 하얀색 벽돌. 빈티지·카페 감성" }, { name: "에이징 가죽", desc: "세월이 묻은 가죽. 쓸수록 멋있어지는 소재" },
+  { name: "블랙 메탈", desc: "검은 철재 프레임. 선반·의자 다리에 사용" }, { name: "테라조", desc: "시멘트에 돌조각을 넣은 바닥. 레트로 패턴" },
+  { name: "린넨", desc: "마직물. 구김이 매력인 자연스러운 패브릭" },
+];
+const colors = [
+  { name: "웜 화이트", desc: "약간 누런 따뜻한 흰색", hex: ["#FAF6F0","#F5EDE0","#EDE4D3"] },
+  { name: "샌드 베이지", desc: "모래색. 부드러운 중간 톤", hex: ["#E8DCCA","#D4C4A8","#C2AD8D"] },
+  { name: "딥 네이비", desc: "깊은 남색. 고급스러운 포인트", hex: ["#3B5998","#2C3E6B","#1B264F"] },
+  { name: "세이지 그린", desc: "회색 섞인 연두. 안정감", hex: ["#C5CEAA","#9CAF88","#7D9B6A"] },
+  { name: "테라코타", desc: "구운 흙색. 지중해 느낌", hex: ["#E07B54","#C8562C","#A0452B"] },
+  { name: "라벤더", desc: "연보라. 감성적인 분위기", hex: ["#E6D8F0","#C9A9E0","#A67BC5"] },
+  { name: "머스타드", desc: "겨자색. 레트로 포인트", hex: ["#E8C84A","#D4A72C","#B8901E"] },
+  { name: "차콜", desc: "진한 회색. 세련된 어두운 색", hex: ["#6B6B6B","#4A4A4A","#333333"] },
+];
+const furniture = [
+  { name: "모듈러 소파", desc: "조각조각 조합하는 소파" }, { name: "캐노피 침대", desc: "천을 드리운 침대. 로맨틱 느낌" },
+  { name: "라운지 체어", desc: "깊이 앉는 안락의자" }, { name: "스탠딩 데스크", desc: "서서 일하는 책상" },
+  { name: "빈티지 암체어", desc: "오래된 팔걸이 의자" }, { name: "플로팅 선반", desc: "벽에 떠 있는 선반" },
+  { name: "원형 테이블", desc: "둥근 식탁·커피 테이블" },
+];
+const deco = [
+  { name: "큰 열대식물", desc: "몬스테라·야자. 공간에 생기" }, { name: "다육식물", desc: "작고 통통한 선인장류" },
+  { name: "행잉 플랜터", desc: "천장·벽에 매다는 화분" }, { name: "아트 포스터", desc: "벽에 거는 그림·사진" },
+  { name: "캔들 세트", desc: "양초. 따뜻한 분위기 소품" }, { name: "빈티지 소품", desc: "오래된 시계, 타자기 등" },
+  { name: "조각 오브제", desc: "작은 조각품. 예술적 포인트" },
+];
+const missions = [
+  { client: "김수현, 28세, 프리랜서 일러스트레이터", space: "원룸", request: "작업과 생활을 한 공간에서 하고 싶어요. 그림 그리는 책상이 중심이 되는 방이면 좋겠어요.", must: ["스탠딩 데스크", "자연광 가득"], budget: "가성비" },
+  { client: "박민지, 35세, 요가 강사", space: "거실", request: "퇴근 후 요가할 수 있는 넓은 거실을 원해요. 마음이 편안해지는 공간이요.", must: ["간접조명", "린넨"], budget: "미니멀" },
+  { client: "이준호, 42세, IT 스타트업 대표", space: "카페", request: "우리 회사 1층에 직원들이 쉴 수 있는 사내 카페를 만들고 싶습니다.", must: ["인더스트리얼", "노출 콘크리트"], budget: "럭셔리" },
+  { client: "정하은, 19세, 대학 새내기", space: "원룸", request: "첫 자취방이에요! 좁지만 예쁘고 아늑한 나만의 공간을 갖고 싶어요.", must: ["아늑한", "캔들 세트"], budget: "가성비" },
+  { client: "최서윤, 31세, 파티시에", space: "카페", request: "제가 만든 디저트를 파는 작은 카페를 열 거예요. 따뜻하고 달콤한 느낌이면 좋겠어요.", must: ["웜 화이트", "원목(오크)"], budget: "가성비" },
+  { client: "강태준, 55세, 건축가", space: "작업실", request: "도면 작업에 집중할 수 있는 조용한 서재 겸 작업실이 필요합니다.", must: ["미니멀", "스포트 조명"], budget: "럭셔리" },
+  { client: "윤서아, 24세, 뷰티 유튜버", space: "원룸", request: "영상 촬영 배경이 될 수 있는 예쁜 방을 꾸미고 싶어요. 화면에 잘 나와야 해요!", must: ["라벤더", "네온 사인"], budget: "미니멀" },
+  { client: "한도윤, 38세, 재즈 뮤지션", space: "거실", request: "음악을 듣고 연주할 수 있는 무드 있는 거실을 원합니다. 밤 분위기가 중요해요.", must: ["드라마틱", "에이징 가죽"], budget: "럭셔리" },
+  { client: "오지민, 22세, 식물 집사", space: "거실", request: "식물이 주인공인 거실을 만들고 싶어요. 정글 같은 느낌이면 최고!", must: ["큰 열대식물", "행잉 플랜터"], budget: "가성비" },
+  { client: "남궁현, 45세, 갤러리 오너", space: "카페", request: "갤러리 1층에 아트 카페를 만들려 합니다. 작품이 돋보이는 절제된 공간이요.", must: ["대리석", "스포트 조명"], budget: "럭셔리" },
+  { client: "송지은, 29세, 소설가", space: "작업실", request: "원고 마감할 때 며칠씩 틀어박힐 수 있는 아늑한 작업실이 필요해요.", must: ["와비사비", "촛불 분위기"], budget: "미니멀" },
+  { client: "백승우, 33세, 커플(동거)", space: "거실", request: "둘이 함께 영화 보고 쉴 수 있는 로맨틱한 거실을 원해요.", must: ["로맨틱", "모듈러 소파"], budget: "가성비" },
+  { client: "임채린, 17세, 고등학생", space: "작업실", request: "수능 공부에 집중할 수 있는 방을 꾸미고 싶어요. 깔끔하고 집중되는 느낌!", must: ["차분한", "플로팅 선반"], budget: "가성비" },
+  { client: "조예준, 40세, 사진작가", space: "카페", request: "제 사진을 전시하면서 커피도 파는 포토 카페를 구상 중이에요.", must: ["벽돌", "창가 역광"], budget: "미니멀" },
+  { client: "허다연, 26세, 미니멀리스트", space: "원룸", request: "물건을 최소화한 깨끗한 공간에서 살고 싶어요. 비어 있는 게 아름다운 방.", must: ["미니멀", "웜 화이트"], budget: "미니멀" },
+];
+
+// ═══ STYLE COMPATIBILITY DATA ═══
+// For each style: items rated 3★ (best match) and 2★ (good match). All others = 1★
+const styleCompat = {
+  '미니멀': {
+    3: ['차분한','미래적','자연광 가득','간접조명','대리석','블랙 메탈','웜 화이트','차콜','플로팅 선반','스탠딩 데스크','다육식물','조각 오브제'],
+    2: ['따뜻한','아늑한','스포트 조명','노출 콘크리트','린넨','샌드 베이지','세이지 그린','원형 테이블','라운지 체어','아트 포스터']
+  },
+  '북유럽': {
+    3: ['따뜻한','아늑한','자연광 가득','웜톤 펜던트','원목(오크)','린넨','웜 화이트','샌드 베이지','모듈러 소파','원형 테이블','큰 열대식물','캔들 세트'],
+    2: ['차분한','활기찬','골든아워','간접조명','황동','세이지 그린','라벤더','라운지 체어','플로팅 선반','다육식물','아트 포스터']
+  },
+  '인더스트리얼': {
+    3: ['드라마틱','활기찬','스포트 조명','창가 역광','노출 콘크리트','블랙 메탈','벽돌','딥 네이비','차콜','스탠딩 데스크','빈티지 암체어','아트 포스터','빈티지 소품'],
+    2: ['미래적','차분한','네온 사인','간접조명','에이징 가죽','테라코타','원형 테이블','플로팅 선반','큰 열대식물']
+  },
+  '보헤미안': {
+    3: ['몽환적','활기찬','로맨틱','골든아워','촛불 분위기','린넨','테라코타','머스타드','라벤더','캐노피 침대','행잉 플랜터','큰 열대식물'],
+    2: ['따뜻한','아늑한','웜톤 펜던트','간접조명','원목(오크)','벽돌','샌드 베이지','세이지 그린','라운지 체어','캔들 세트','빈티지 소품']
+  },
+  '와비사비': {
+    3: ['차분한','아늑한','자연광 가득','촛불 분위기','원목(오크)','노출 콘크리트','린넨','샌드 베이지','웜 화이트','원형 테이블','빈티지 암체어','다육식물','조각 오브제'],
+    2: ['따뜻한','몽환적','간접조명','골든아워','테라조','세이지 그린','차콜','플로팅 선반','캔들 세트','아트 포스터']
+  },
+  '미드센추리 모던': {
+    3: ['활기찬','따뜻한','자연광 가득','웜톤 펜던트','원목(오크)','황동','테라코타','머스타드','라운지 체어','원형 테이블','아트 포스터'],
+    2: ['로맨틱','드라마틱','골든아워','스포트 조명','에이징 가죽','테라조','샌드 베이지','세이지 그린','모듈러 소파','큰 열대식물','조각 오브제']
+  },
+  '빈티지 레트로': {
+    3: ['따뜻한','로맨틱','골든아워','웜톤 펜던트','에이징 가죽','벽돌','테라조','머스타드','테라코타','빈티지 암체어','원형 테이블','빈티지 소품','캔들 세트'],
+    2: ['아늑한','몽환적','촛불 분위기','간접조명','원목(오크)','황동','샌드 베이지','라벤더','캐노피 침대','아트 포스터','행잉 플랜터']
+  },
+  '스칸디나비안': {
+    3: ['차분한','따뜻한','자연광 가득','간접조명','원목(오크)','린넨','웜 화이트','세이지 그린','플로팅 선반','모듈러 소파','다육식물','큰 열대식물'],
+    2: ['아늑한','활기찬','웜톤 펜던트','골든아워','블랙 메탈','샌드 베이지','차콜','라운지 체어','원형 테이블','아트 포스터','조각 오브제']
+  }
+};
+
+function getCompat(itemName) {
+  if (!sel.style || mode !== 'free') return 0; // 0 = don't show
+  const data = styleCompat[sel.style];
+  if (!data) return 0;
+  if (data[3].includes(itemName)) return 3;
+  if (data[2].includes(itemName)) return 2;
+  return 1;
+}
+
+function compatHtml(itemName) {
+  const score = getCompat(itemName);
+  if (score === 0) return '';
+  const stars = '★'.repeat(score) + '☆'.repeat(3 - score);
+  return `<span class="compat s${score}">${stars}</span>`;
+}
+
+// ═══ STEP CONFIGS ═══
+const FREE_STEPS = [
+  { key: 'space', label: '공간' }, { key: 'style', label: '스타일' },
+  { key: 'mood', label: '무드' }, { key: 'light', label: '조명' },
+  { key: 'mat_col', label: '소재·색상' }, { key: 'fur_dec', label: '가구·소품' },
+  { key: 'result', label: '완성!' },
+];
+const MISSION_STEPS = [
+  { key: 'briefing', label: '브리핑' }, { key: 'analysis', label: '분석' },
+  { key: 'concept', label: '컨셉' }, { key: 'design', label: '디자인' },
+  { key: 'prompt', label: '프롬프트' }, { key: 'present', label: '발표' },
+];
+
+// ═══ STATE ═══
+let mode = null;
+let currentStep = 0;
+let sel = { space: null, style: null, mood: null, light: null, material: null, color: null, furniture: null, deco: null };
+let currentMission = null;
+let cardFlipped = false;
+let usedMissions = [];
+// Mission mode inputs
+let missionInputs = { analysis1: '', analysis2: '', analysis3: '', concept: '', reason1: '', reason2: '', reason3: '', teamName: '' };
+let uploadedImage = null; // data URL of uploaded result image
+
+// ═══════════════════════════════════════
+//  SCREEN MANAGEMENT
+// ═══════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  const showNav = (id === 'free' || id === 'mission');
+  document.getElementById('bottomNav').style.display = showNav ? '' : 'none';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function goHome() {
+  mode = null; currentStep = 0;
+  sel = { space: null, style: null, mood: null, light: null, material: null, color: null, furniture: null, deco: null };
+  currentMission = null; cardFlipped = false;
+  missionInputs = { analysis1: '', analysis2: '', analysis3: '', concept: '', reason1: '', reason2: '', reason3: '', teamName: '' };
+  uploadedImage = null;
+  const flip = document.getElementById('cardFlip');
+  if (flip) flip.classList.remove('flipped');
+  showScreen('home');
+}
+
+function startMode(m) {
+  mode = m; currentStep = 0;
+  sel = { space: null, style: null, mood: null, light: null, material: null, color: null, furniture: null, deco: null };
+  currentMission = null;
+  missionInputs = { analysis1: '', analysis2: '', analysis3: '', concept: '', reason1: '', reason2: '', reason3: '', teamName: '' };
+
+  if (mode === 'mission') {
+    showScreen('mission-draw');
+  } else {
+    showScreen('free');
+    renderFreeStep();
+  }
+}
+
+// ═══════════════════════════════════════
+//  MISSION CARD
+// ═══════════════════════════════════════
+function drawCard() {
+  const flip = document.getElementById('cardFlip');
+  if (cardFlipped) {
+    flip.classList.remove('flipped'); cardFlipped = false;
+    setTimeout(() => drawCard(), 400);
+    return;
+  }
+  if (usedMissions.length >= missions.length) usedMissions = [];
+  let available = missions.filter((_, i) => !usedMissions.includes(i));
+  let idx = missions.indexOf(available[Math.floor(Math.random() * available.length)]);
+  usedMissions.push(idx);
+  currentMission = missions[idx];
+
+  const front = document.getElementById('cardFront');
+  front.innerHTML = `
+    <div class="cf-header">
+      <div class="cf-mission-num">MISSION #${String(idx + 1).padStart(2, '0')}</div>
+      <div class="cf-title">클라이언트 의뢰서</div>
+    </div>
+    <div class="cf-body">
+      <div class="cf-row"><div class="cf-icon">👤</div><div class="cf-content"><div class="cf-label">의뢰인</div><div class="cf-value">${currentMission.client}</div></div></div>
+      <div class="cf-row"><div class="cf-icon">🏠</div><div class="cf-content"><div class="cf-label">공간</div><div class="cf-value">${currentMission.space}</div></div></div>
+      <div class="cf-row"><div class="cf-icon">📋</div><div class="cf-content"><div class="cf-label">요청</div><div class="cf-value">${currentMission.request}</div></div></div>
+      <div class="cf-row"><div class="cf-icon">⭐</div><div class="cf-content"><div class="cf-label">필수 조건</div><div class="cf-value">${currentMission.must.join(', ')}</div></div></div>
+      <div class="cf-row"><div class="cf-icon">💰</div><div class="cf-content"><div class="cf-label">예산 느낌</div><div class="cf-value">${currentMission.budget}</div></div></div>
+    </div>
+    <div class="cf-footer">
+      <button class="btn btn-draw" onclick="event.stopPropagation(); redraw()">다시 뽑기</button>
+      <button class="btn btn-use" onclick="event.stopPropagation(); acceptMission()">이 미션으로 시작!</button>
+    </div>
+  `;
+  requestAnimationFrame(() => { flip.classList.add('flipped'); cardFlipped = true; });
+  document.getElementById('missionHint').textContent = `${missions.length}장 중 ${usedMissions.length}번째 카드`;
+}
+
+function redraw() {
+  const flip = document.getElementById('cardFlip');
+  flip.classList.remove('flipped'); cardFlipped = false;
+  setTimeout(() => drawCard(), 400);
+}
+
+function acceptMission() {
+  const spaceMap = { '원룸': 'oneroom', '거실': 'living', '작업실': 'studio', '카페': 'cafe' };
+  sel.space = spaceMap[currentMission.space] || null;
+  currentStep = 0;
+  showScreen('mission');
+  renderMissionStep();
+}
+
+// ═══════════════════════════════════════
+//  FREE MODE RENDERER
+// ═══════════════════════════════════════
+function renderFreeProgress() {
+  const stepsEl = document.getElementById('freeProgressSteps');
+  const labelsEl = document.getElementById('freeProgressLabels');
+  let sh = '', lh = '';
+  FREE_STEPS.forEach((s, i) => {
+    const done = i < currentStep, active = i === currentStep;
+    sh += `<div class="prog-step"><div class="prog-dot ${done?'done':active?'active':''}">${done?'✓':i+1}</div>`;
+    if (i < FREE_STEPS.length - 1) sh += `<div class="prog-line${done?' done':''}"></div>`;
+    sh += `</div>`;
+    lh += `<div class="prog-label ${done?'done':active?'active':''}">${s.label}</div>`;
+  });
+  stepsEl.innerHTML = sh; labelsEl.innerHTML = lh;
+}
+
+function renderFreeStep() {
+  document.querySelectorAll('#screen-free .step-page').forEach(p => p.classList.remove('active'));
+  const page = document.getElementById(`free-step-${currentStep}`);
+  if (page) page.classList.add('active');
+
+  switch(currentStep) {
+    case 0: renderSpaceCards('freeSpaceCards'); break;
+    case 1: renderChipGroup('freeStyleChips', styles, 'style'); break;
+    case 2: renderChipGroup('freeMoodChips', moods, 'mood'); break;
+    case 3: renderChipGroup('freeLightChips', lights, 'light'); break;
+    case 4: renderChipGroup('freeMaterialChips', materials, 'material'); renderColorChips('freeColorChips', colors, 'color'); break;
+    case 5: renderChipGroup('freeFurnitureChips', furniture, 'furniture'); renderChipGroup('freeDecoChips', deco, 'deco'); break;
+    case 6: renderFreeSummary(); break;
+  }
+  // Show compatibility notice on steps 2~5 when style is selected
+  if (mode === 'free' && sel.style && currentStep >= 2 && currentStep <= 5) {
+    const notice = document.createElement('div');
+    notice.className = 'compat-notice';
+    notice.innerHTML = `<strong>"${sel.style}"</strong> 스타일과의 궁합: ★★★ 찰떡 · ★★☆ 잘 어울림 · ★☆☆ 의외의 조합 — 정답은 없어요, 참고만 하세요!`;
+    const stepPage = document.getElementById(`free-step-${currentStep}`);
+    const firstChipSection = stepPage.querySelector('.chip-section');
+    if (firstChipSection) stepPage.insertBefore(notice, firstChipSection);
+  }
+  renderFreeProgress(); updateFreeNav();
+}
+
+function renderSpaceCards(containerId) {
+  const c = document.getElementById(containerId);
+  c.innerHTML = spaces.map(sp => `
+    <div class="space-card ${sel.space===sp.id?'selected':''}" onclick="pickSpace('${sp.id}')">
+      <div class="card-img">${sp.img?`<img src="${sp.img}" alt="${sp.name}">`:`<div class="placeholder-wrap"><span class="emoji">${sp.emoji}</span><span class="img-hint">이미지 준비 중</span></div>`}</div>
+      <div class="card-body"><div class="card-title"><span class="check">✓</span>${sp.name}</div><div class="card-desc">${sp.desc}</div></div>
+    </div>`).join('');
+}
+function pickSpace(id) { sel.space = sel.space===id?null:id; if(mode==='free') renderFreeStep(); }
+
+function renderChipGroup(cid, items, key) {
+  const el = document.getElementById(cid);
+  const labels = { style:'스타일', mood:'무드', light:'조명', material:'소재', color:'색상', furniture:'가구', deco:'식물/악세서리' };
+  el.innerHTML = `<div class="chip-section-label">${labels[key]||''}</div><div class="chips-rich">${items.map(it => {
+    const on = sel[key] === it.name;
+    const stars = (key !== 'style') ? compatHtml(it.name) : '';
+    return `<div class="chip-rich ${on?'on':''}" onclick="pickChip('${key}','${it.name.replace(/'/g,"\\'")}')"><div class="cr-name">${it.name}${stars}</div><div class="cr-desc">${it.desc}</div></div>`;
+  }).join('')}</div>`;
+}
+function renderColorChips(cid, items, key) {
+  const el = document.getElementById(cid);
+  el.innerHTML = `<div class="chip-section-label">색상</div><div class="chips-rich">${items.map(it => {
+    const on = sel[key] === it.name;
+    const stars = compatHtml(it.name);
+    return `<div class="chip-color ${on?'on':''}" onclick="pickChip('${key}','${it.name}')"><div class="swatch">${it.hex.map(h=>`<div class="swatch-dot" style="background:${h}"></div>`).join('')}</div><div class="cr-text"><div class="cr-name">${it.name}${stars}</div><div class="cr-desc">${it.desc}</div></div></div>`;
+  }).join('')}</div>`;
+}
+function pickChip(key, val) {
+  sel[key] = sel[key]===val?null:val;
+  if (mode==='free') renderFreeStep();
+  else if (mode==='mission') renderMissionStep();
+}
+
+
+function renderFreeSummary() {
+  const space = spaces.find(s => s.id === sel.space);
+  const imgP = document.getElementById('freeBaseImgPreview');
+  if (space && space.img) {
+    imgP.innerHTML = `<img src="${space.img}" alt="${space.name}" onerror="this.parentElement.style.display='none'"><div class="bip-bar"><div class="bip-info"><span class="bip-label">베이스 이미지</span><span class="bip-name">${space.name}</span></div><span class="save-hint">💡 이미지 위에서 우클릭 → 다른 이름으로 저장</span></div>`;
+    imgP.style.display = '';
+  } else { imgP.style.display = 'none'; }
+
+  const card = document.getElementById('freeSummaryCard');
+  const rows = [['공간',space?.name],['스타일',sel.style],['무드',sel.mood],['조명',sel.light],['소재',sel.material],['색상',sel.color],['가구',sel.furniture],['소품',sel.deco]];
+  card.innerHTML = `<div class="summary-title">나의 공간 레시피</div>${rows.map(([c,v])=>`<div class="summary-row"><span class="summary-cat">${c}</span><span class="summary-val ${v?'':'empty'}">${v||'선택 안 함'}</span></div>`).join('')}`;
+
+  const prompt = document.getElementById('freePromptText');
+  const kw = [sel.style,sel.mood,sel.light,sel.material,sel.color,sel.furniture,sel.deco].filter(Boolean);
+  prompt.textContent = kw.join(', ');
+}
+
+function getFreeStepSel() {
+  switch(currentStep) {
+    case 0: return sel.space!==null;
+    case 1: return sel.style!==null;
+    case 2: return sel.mood!==null;
+    case 3: return sel.light!==null;
+    case 4: return sel.material!==null||sel.color!==null;
+    case 5: return sel.furniture!==null||sel.deco!==null;
+    default: return true;
+  }
+}
+
+function updateFreeNav() {
+  const info = document.getElementById('navInfo');
+  const btns = document.getElementById('navBtns');
+  const hasSel = getFreeStepSel();
+  if (currentStep === 6) {
+    const kwCount = [sel.style,sel.mood,sel.light,sel.material,sel.color,sel.furniture,sel.deco].filter(Boolean).length;
+    info.innerHTML = `🎨 자유 디자인 · <span class="chosen">${kwCount}개</span> 키워드`;
+    btns.innerHTML = `
+      <button class="btn btn-back" onclick="freeBack()">← 수정하기</button>
+      <button class="btn btn-copy2" id="copyBtn2" onclick="copyFreePrompt()">복사하기</button>
+      <button class="btn btn-home" onclick="goHome()">🏠 처음으로</button>
+    `;
+  } else {
+    const stepName = FREE_STEPS[currentStep].label;
+    info.innerHTML = hasSel ? `🎨 자유 디자인 · <span class="chosen">${stepName}</span> 선택 완료` : `🎨 자유 디자인 · ${stepName}을(를) 선택해주세요`;
+    let h = '';
+    if (currentStep > 0) h += `<button class="btn btn-back" onclick="freeBack()">← 이전</button>`;
+    if (!hasSel && currentStep > 0) h += `<span class="skip-link" onclick="freeNext()">건너뛰기</span>`;
+    const isLast = currentStep === 5;
+    const disabled = (!hasSel && currentStep === 0) ? 'disabled' : '';
+    h += `<button class="btn btn-next ${isLast?'finish':''}" onclick="freeNext()" ${disabled}>${isLast?'완성하기 →':'다음 →'}</button>`;
+    btns.innerHTML = h;
+  }
+}
+function freeNext() { if(currentStep===0&&!sel.space) return; if(currentStep<FREE_STEPS.length-1){currentStep++;renderFreeStep();window.scrollTo({top:0,behavior:'smooth'});} }
+function freeBack() { if(currentStep>0){currentStep--;renderFreeStep();window.scrollTo({top:0,behavior:'smooth'});} }
+function copyFreePrompt() {
+  const text = document.getElementById('freePromptText').textContent;
+  if(!text)return;
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn=document.getElementById('copyBtn2');btn.textContent='복사 완료!';btn.classList.add('done');
+    setTimeout(()=>{btn.textContent='복사하기';btn.classList.remove('done');},2000);
+  });
+}
+
+// ═══════════════════════════════════════
+//  MISSION MODE RENDERER (6 Steps)
+// ═══════════════════════════════════════
+function renderMissionProgress() {
+  const stepsEl = document.getElementById('missionProgressSteps');
+  const labelsEl = document.getElementById('missionProgressLabels');
+  let sh = '', lh = '';
+  MISSION_STEPS.forEach((s, i) => {
+    const done = i < currentStep, active = i === currentStep;
+    sh += `<div class="prog-step"><div class="prog-dot ${done?'done':active?'active':''}">${done?'✓':i+1}</div>`;
+    if (i < MISSION_STEPS.length - 1) sh += `<div class="prog-line${done?' done':''}"></div>`;
+    sh += `</div>`;
+    lh += `<div class="prog-label ${done?'done':active?'active':''}">${s.label}</div>`;
+  });
+  stepsEl.innerHTML = sh; labelsEl.innerHTML = lh;
+}
+
+function renderMissionStep() {
+  document.querySelectorAll('#screen-mission .step-page').forEach(p => p.classList.remove('active'));
+  const page = document.getElementById(`mission-step-${currentStep}`);
+  if (page) page.classList.add('active');
+
+  switch(currentStep) {
+    case 0: renderMissionBriefing(); break;
+    case 1: renderMissionAnalysis(); break;
+    case 2: renderMissionConcept(); break;
+    case 3: renderMissionDesign(); break;
+    case 4: renderMissionPrompt(); break;
+    case 5: renderMissionPresent(); break;
+  }
+  renderMissionProgress(); updateMissionNav();
+}
+
+function renderMissionBriefing() {
+  const el = document.getElementById('missionStepBrief');
+  if (!currentMission) return;
+  el.innerHTML = `
+    <div class="mb-icon">🎯</div>
+    <div class="mb-text">
+      <div class="mb-client">👤 ${currentMission.client}</div>
+      <div class="mb-req">${currentMission.request}</div>
+      <div class="mb-must">⭐ 필수: ${currentMission.must.join(', ')} · 💰 ${currentMission.budget}</div>
+    </div>
+  `;
+}
+
+function getAnalysisHints() {
+  // Generate contextual hints based on mission
+  const m = currentMission;
+  const space = m.space;
+  // Use full client string for matching (handles all formats)
+  const clientStr = m.client;
+
+  // Hint 1: What does the client value most?
+  const hint1Map = {
+    '프리랜서 일러스트레이터': '"작업에 집중할 수 있는 환경", "창작 영감을 주는 공간"',
+    '요가 강사': '"마음의 평화", "몸과 마음이 쉴 수 있는 환경"',
+    'IT 스타트업 대표': '"직원들의 리프레시", "회사 문화를 보여주는 공간"',
+    '대학 새내기': '"나만의 독립된 공간", "예쁘면서 실용적인 방"',
+    '파티시에': '"손님이 편안함을 느끼는 것", "디저트가 돋보이는 배경"',
+    '건축가': '"방해 없이 몰입할 수 있는 환경", "전문적인 작업 효율"',
+    '뷰티 유튜버': '"카메라에 잘 나오는 배경", "나의 브랜드 이미지 표현"',
+    '재즈 뮤지션': '"음악에 빠져들 수 있는 분위기", "밤의 무드"',
+    '식물 집사': '"식물이 잘 자라는 환경", "자연과 함께 사는 느낌"',
+    '갤러리 오너': '"작품이 주인공인 절제된 공간", "고급스러운 분위기"',
+    '소설가': '"며칠씩 있어도 편안한 공간", "글쓰기에 집중되는 분위기"',
+    '커플(동거)': '"둘이 함께 편하게 쉬는 시간", "로맨틱한 일상"',
+    '고등학생': '"공부에 집중되는 깔끔한 환경", "내 방이 좋아지는 느낌"',
+    '사진작가': '"사진이 돋보이는 전시 효과", "커피와 예술의 조화"',
+    '미니멀리스트': '"물건 없이도 아름다운 공간", "비움의 미학"',
+  };
+
+  // Hint 2: What problem needs solving?
+  const hint2Map = {
+    '프리랜서 일러스트레이터': '"좁은 원룸에서 작업 공간과 생활 공간을 어떻게 나눌까"',
+    '요가 강사': '"운동 공간과 일상 공간의 공존", "바닥 공간 확보"',
+    'IT 스타트업 대표': '"일하는 공간과 쉬는 공간의 전환", "많은 직원이 동시에 이용"',
+    '대학 새내기': '"좁은 공간을 넓어 보이게", "예산 내에서 최대 효과"',
+    '파티시에': '"디저트 진열과 좌석 배치의 균형", "따뜻하면서 깔끔한 인상"',
+    '건축가': '"넓은 도면 작업 공간 확보", "자료 보관과 정리"',
+    '뷰티 유튜버': '"조명과 촬영 각도", "배경이 지저분해 보이지 않게"',
+    '재즈 뮤지션': '"낮에는 평범한 거실, 밤에는 바(bar) 같은 분위기 전환"',
+    '식물 집사': '"충분한 채광 확보", "물주기와 관리 동선"',
+    '갤러리 오너': '"작품 감상에 방해되지 않으면서도 카페 기능 수행"',
+    '소설가': '"장시간 앉아도 편한 환경", "외부 자극 차단"',
+    '커플(동거)': '"두 사람의 취향 조합", "함께 쓰면서도 각자 편한 공간"',
+    '고등학생': '"유혹 요소(핸드폰, TV) 최소화", "정리정돈이 쉬운 구조"',
+    '사진작가': '"작품 교체가 쉬운 벽면", "자연광 활용과 카페 조명의 조화"',
+    '미니멀리스트': '"적은 물건으로도 공간이 허전해 보이지 않게"',
+  };
+
+  // Hint 3: What mood/emotion?
+  const hint3Map = {
+    '프리랜서 일러스트레이터': '"영감이 떠오르는 설렘", "편안하면서도 집중되는 몰입감"',
+    '요가 강사': '"깊게 숨 쉴 수 있는 평온함", "맨발로 걷고 싶은 편안함"',
+    'IT 스타트업 대표': '"일에서 벗어난 해방감", "동료와 자연스럽게 대화하는 편안함"',
+    '대학 새내기': '"집에 오면 기분 좋아지는 아늑함", "친구 초대하고 싶은 뿌듯함"',
+    '파티시에': '"디저트를 먹기도 전에 행복해지는 따뜻함"',
+    '건축가': '"잡념이 사라지는 고요한 집중", "프로페셔널한 자부심"',
+    '뷰티 유튜버': '"촬영 버튼 누르고 싶어지는 설렘", "나만의 세계관"',
+    '재즈 뮤지션': '"위스키 한 잔 하고 싶어지는 분위기", "시간이 느리게 가는 느낌"',
+    '식물 집사': '"숲속에 있는 것 같은 상쾌함", "생명력이 가득한 활력"',
+    '갤러리 오너': '"작품 앞에서 생각에 잠기는 정적", "커피 한 모금의 여유"',
+    '소설가': '"이야기 속으로 빠져드는 몰입", "따뜻한 차 한 잔의 위로"',
+    '커플(동거)': '"영화 속 장면 같은 로맨틱함", "함께 있는 것만으로 행복한 편안함"',
+    '고등학생': '"책상 앞에 앉으면 자동으로 집중되는 느낌", "깔끔해서 기분 좋은 상쾌함"',
+    '사진작가': '"작품을 천천히 감상하는 여유", "커피 향과 어우러지는 예술적 감성"',
+    '미니멀리스트': '"아무것도 없는데 충만한 평화", "공간 자체가 주는 고요한 만족"',
+  };
+
+  // Hint 4: Concept one-liner
+  const conceptMap = {
+    '프리랜서 일러스트레이터': '영감이 샘솟는 나만의 아틀리에',
+    '요가 강사': '숨 쉬는 것만으로 치유되는 자연 거실',
+    'IT 스타트업 대표': '일상에서 벗어나 리셋되는 직원 쉼터',
+    '대학 새내기': '좁지만 알찬 나만의 첫 번째 보금자리',
+    '파티시에': '디저트만큼 달콤한 분위기의 동네 카페',
+    '건축가': '한 장의 도면에 몰입하는 고요한 서재',
+    '뷰티 유튜버': '카메라 앵글마다 예쁜 나의 브랜드 룸',
+    '재즈 뮤지션': '밤이 깊을수록 분위기가 깊어지는 거실',
+    '식물 집사': '도심 속 작은 정글, 초록이 숨 쉬는 거실',
+    '갤러리 오너': '작품과 커피가 대화하는 절제된 공간',
+    '소설가': '이야기가 태어나는 아늑한 은신처',
+    '커플(동거)': '둘만의 시간이 특별해지는 로맨틱 거실',
+    '고등학생': '앉기만 하면 집중 모드 ON 되는 깔끔한 방',
+    '사진작가': '한 컷의 사진이 전시가 되는 포토 카페',
+    '미니멀리스트': '비움으로 완성되는 고요한 원룸',
+  };
+
+  const jobKey = Object.keys(hint1Map).find(k => clientStr.includes(k)) || '';
+  return {
+    hint1: hint1Map[jobKey] || '"이 사람에게 가장 중요한 가치는 뭘까?"',
+    hint2: hint2Map[jobKey] || '"이 공간에서 가장 어려운 과제는?"',
+    hint3: hint3Map[jobKey] || '"이 공간에 들어갔을 때 어떤 감정을 느꼈으면 할까?"',
+    concept: conceptMap[jobKey] || '나만의 특별한 공간',
+  };
+}
+
+function renderMissionAnalysis() {
+  const el = document.getElementById('missionAnalysisContent');
+  const hints = getAnalysisHints();
+  el.innerHTML = `
+    <div class="mission-brief" style="margin-bottom:24px">
+      <div class="mb-icon">🎯</div>
+      <div class="mb-text">
+        <div class="mb-client">👤 ${currentMission.client}</div>
+        <div class="mb-req">${currentMission.request}</div>
+        <div class="mb-must">⭐ 필수: ${currentMission.must.join(', ')}</div>
+      </div>
+    </div>
+    <div class="guide-question">
+      <div class="gq-q">💬 이 클라이언트가 가장 중요하게 여기는 것은?</div>
+      <div class="gq-hint">예: ${hints.hint1}</div>
+    </div>
+    <div class="input-group">
+      <div class="input-label">✍️ 팀의 답변</div>
+      <textarea class="team-input" placeholder="팀원과 이야기한 후 핵심을 적어주세요..." oninput="missionInputs.analysis1=this.value">${missionInputs.analysis1}</textarea>
+    </div>
+    <div class="guide-question">
+      <div class="gq-q">🔍 이 공간에서 해결해야 할 문제는?</div>
+      <div class="gq-hint">예: ${hints.hint2}</div>
+    </div>
+    <div class="input-group">
+      <div class="input-label">✍️ 팀의 답변</div>
+      <textarea class="team-input" placeholder="이 공간의 핵심 과제를 적어주세요..." oninput="missionInputs.analysis2=this.value">${missionInputs.analysis2}</textarea>
+    </div>
+    <div class="guide-question">
+      <div class="gq-q">🎨 어떤 분위기를 느끼게 해줘야 할까?</div>
+      <div class="gq-hint">예: ${hints.hint3}</div>
+    </div>
+    <div class="input-group">
+      <div class="input-label">✍️ 팀의 답변</div>
+      <textarea class="team-input" placeholder="원하는 감정/분위기를 적어주세요..." oninput="missionInputs.analysis3=this.value">${missionInputs.analysis3}</textarea>
+    </div>
+  `;
+}
+
+function renderMissionConcept() {
+  const el = document.getElementById('missionConceptContent');
+  const mustTags = currentMission.must.map(m => `<span class="constraint-tag required">⭐ ${m}</span>`).join('');
+  const hints = getAnalysisHints();
+
+  el.innerHTML = `
+    <div class="constraint-notice">
+      <strong>미션 필수 조건:</strong> ${mustTags}<br>
+      <span style="font-size:12px;color:var(--muted)">아래 선택 시 필수 조건에 해당하는 항목이 자동으로 표시됩니다.</span>
+    </div>
+    <div class="input-group">
+      <div class="input-label">💡 이 공간을 한마디로 표현한다면?</div>
+      <textarea class="team-input" style="min-height:50px" placeholder="예: '${hints.concept}'" oninput="missionInputs.concept=this.value">${missionInputs.concept}</textarea>
+    </div>
+    <div class="tip-box"><div class="tip-label">컨셉이란?</div>디자인 컨셉은 "이 공간은 ___한 곳이다"를 한 문장으로 정리하는 것입니다. 이 한 문장이 이후 모든 결정의 기준이 됩니다.</div>
+    <div style="margin-top:24px">
+      <div class="step-question" style="font-size:20px; margin-bottom:16px;">스타일과 무드를 골라주세요</div>
+      <div class="chip-section" id="missionStyleChips"></div>
+      <div class="tip-box" style="margin-top:16px; margin-bottom:16px;"><div class="tip-label">분위기 연출 예시</div>
+        <strong>따뜻한</strong> → 카페 라떼 색 소파 + 무릎 담요 + 간접 조명<br>
+        <strong>드라마틱</strong> → 어두운 벽 + 스포트 조명 하나 + 금속 소재<br>
+        <strong>몽환적</strong> → 쉬어 커튼 + 라벤더 빛 + 구름 같은 러그<br>
+        <strong>차분한</strong> → 화이트 + 우드 + 아무 소리 없는 고요함
+      </div>
+      <div class="chip-section" id="missionMoodChips"></div>
+    </div>
+  `;
+  renderChipGroup('missionStyleChips', styles, 'style');
+  renderChipGroup('missionMoodChips', moods, 'mood');
+  highlightMustItems();
+}
+
+function renderMissionDesign() {
+  const el = document.getElementById('missionDesignContent');
+  const mustTags = currentMission.must.map(m => `<span class="constraint-tag required">⭐ ${m}</span>`).join('');
+
+  el.innerHTML = `
+    <div class="constraint-notice">
+      <strong>미션 필수 조건:</strong> ${mustTags}
+    </div>
+    <div class="chip-section" id="missionLightChips"></div>
+    <div class="chip-section" id="missionMaterialChips"></div>
+    <div class="chip-section" id="missionColorChips"></div>
+    <div class="chip-section" id="missionFurnitureChips"></div>
+    <div class="chip-section" id="missionDecoChips"></div>
+  `;
+  renderChipGroup('missionLightChips', lights, 'light');
+  renderChipGroup('missionMaterialChips', materials, 'material');
+  renderColorChips('missionColorChips', colors, 'color');
+  renderChipGroup('missionFurnitureChips', furniture, 'furniture');
+  renderChipGroup('missionDecoChips', deco, 'deco');
+  highlightMustItems();
+}
+
+function highlightMustItems() {
+  if (!currentMission) return;
+  // Add visual indicator to must-have items
+  setTimeout(() => {
+    document.querySelectorAll('#screen-mission .chip-rich, #screen-mission .chip-color').forEach(chip => {
+      const name = chip.querySelector('.cr-name');
+      if (name && currentMission.must.includes(name.textContent)) {
+        chip.style.boxShadow = '0 0 0 2px var(--sage)';
+        chip.style.borderColor = 'var(--sage)';
+        if (!chip.querySelector('.must-badge')) {
+          const badge = document.createElement('span');
+          badge.className = 'must-badge';
+          badge.style.cssText = 'font-size:10px;color:var(--sage);font-weight:700;margin-left:6px;';
+          badge.textContent = '⭐필수';
+          name.appendChild(badge);
+        }
+      }
+    });
+  }, 50);
+}
+
+function buildMissionPromptText() {
+  // Line 1: Context sentence from analysis + concept
+  const clientName = currentMission.client.split(',')[0];
+  const clientJob = currentMission.client.split(',').slice(1).join(',').trim();
+  const space = spaces.find(s => s.id === sel.space);
+
+  let contextParts = [];
+  // From concept
+  if (missionInputs.concept) {
+    contextParts.push(missionInputs.concept);
+  } else {
+    // Fallback: build from analysis inputs
+    if (missionInputs.analysis1) contextParts.push(missionInputs.analysis1);
+    if (missionInputs.analysis3) contextParts.push(missionInputs.analysis3 + ' 분위기');
+  }
+
+  // Line 2: Keywords
+  const kw = [sel.style,sel.mood,sel.light,sel.material,sel.color,sel.furniture,sel.deco].filter(Boolean);
+
+  let line1 = '';
+  if (contextParts.length > 0) {
+    line1 = `${clientJob ? clientJob + '을 위한 ' : ''}${contextParts.join(', ')}. `;
+  }
+  const line2 = kw.join(', ');
+
+  return { full: (line1 + line2).trim(), line1: line1.trim(), line2, kw };
+}
+
+function renderMissionPrompt() {
+  const el = document.getElementById('missionPromptContent');
+  const space = spaces.find(s => s.id === sel.space);
+  const prompt = buildMissionPromptText();
+
+  let imgHtml = '';
+  if (space && space.img) {
+    imgHtml = `<div class="base-img-preview"><img src="${space.img}" alt="${space.name}" onerror="this.parentElement.style.display='none'"><div class="bip-bar"><div class="bip-info"><span class="bip-label">베이스 이미지</span><span class="bip-name">${space.name}</span></div><span class="save-hint">💡 이미지 위에서 우클릭 → 다른 이름으로 저장</span></div></div>`;
+  }
+
+  el.innerHTML = `
+    ${imgHtml}
+    <div class="summary-card">
+      <div class="summary-title">미션 디자인 요약</div>
+      <div class="summary-row"><span class="summary-cat">클라이언트</span><span class="summary-val">${currentMission.client.split(',')[0]}</span></div>
+      <div class="summary-row"><span class="summary-cat">공간</span><span class="summary-val">${space?.name||'-'}</span></div>
+      <div class="summary-row"><span class="summary-cat">컨셉</span><span class="summary-val">${missionInputs.concept||'미입력'}</span></div>
+      <div class="summary-row"><span class="summary-cat">핵심 가치</span><span class="summary-val ${missionInputs.analysis1?'':'empty'}">${missionInputs.analysis1||'미입력'}</span></div>
+      <div class="summary-row"><span class="summary-cat">목표 분위기</span><span class="summary-val ${missionInputs.analysis3?'':'empty'}">${missionInputs.analysis3||'미입력'}</span></div>
+      <div class="summary-row"><span class="summary-cat">스타일</span><span class="summary-val ${sel.style?'':'empty'}">${sel.style||'선택 안 함'}</span></div>
+      <div class="summary-row"><span class="summary-cat">무드</span><span class="summary-val ${sel.mood?'':'empty'}">${sel.mood||'선택 안 함'}</span></div>
+      <div class="summary-row"><span class="summary-cat">조명</span><span class="summary-val ${sel.light?'':'empty'}">${sel.light||'선택 안 함'}</span></div>
+      <div class="summary-row"><span class="summary-cat">소재</span><span class="summary-val ${sel.material?'':'empty'}">${sel.material||'선택 안 함'}</span></div>
+      <div class="summary-row"><span class="summary-cat">색상</span><span class="summary-val ${sel.color?'':'empty'}">${sel.color||'선택 안 함'}</span></div>
+      <div class="summary-row"><span class="summary-cat">가구</span><span class="summary-val ${sel.furniture?'':'empty'}">${sel.furniture||'선택 안 함'}</span></div>
+      <div class="summary-row"><span class="summary-cat">소품</span><span class="summary-val ${sel.deco?'':'empty'}">${sel.deco||'선택 안 함'}</span></div>
+    </div>
+    <div class="prompt-box">
+      <div class="prompt-label">Opal에 붙여넣을 텍스트</div>
+      <div class="prompt-text" id="missionPromptText">${prompt.full}</div>
+    </div>
+    ${prompt.line1 ? `<div class="tip-box" style="margin-top:12px"><div class="tip-label">프롬프트 구조</div><strong>맥락 문장:</strong> ${prompt.line1}<br><strong>키워드:</strong> ${prompt.line2}</div>` : ''}
+    <div class="howto-mini">
+      <div class="howto-card"><div class="hw-num">1</div><div class="hw-text">위 이미지를<br><strong>다운로드</strong></div></div>
+      <div class="howto-card"><div class="hw-num">2</div><div class="hw-text">키워드 텍스트를<br><strong>복사</strong></div></div>
+      <div class="howto-card"><div class="hw-num">3</div><div class="hw-text">Opal 앱에<br><strong>업로드 + 붙여넣기</strong></div></div>
+      <div class="howto-card"><div class="hw-num">4</div><div class="hw-text"><strong>생성 버튼</strong>을 누르고<br>결과 확인!</div></div>
+    </div>
+  `;
+}
+
+function handleImageUpload(input) {
+  if (!input.files || !input.files[0]) return;
+  const file = input.files[0];
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    uploadedImage = e.target.result;
+    renderMissionPresent();
+  };
+  reader.readAsDataURL(file);
+}
+
+function renderMissionPresent() {
+  const el = document.getElementById('missionPresentContent');
+  const space = spaces.find(s => s.id === sel.space);
+  const kw = [sel.style,sel.mood,sel.light,sel.material,sel.color,sel.furniture,sel.deco].filter(Boolean);
+
+  // Upload area
+  let uploadHtml = '';
+  if (uploadedImage) {
+    uploadHtml = `
+      <div class="upload-area has-image">
+        <img src="${uploadedImage}" alt="AI 생성 결과">
+        <div class="ua-bar">
+          <span class="ua-label">✅ AI 생성 결과 이미지</span>
+          <span class="ua-change" onclick="document.getElementById('resultImgInput').click()">이미지 변경</span>
+        </div>
+      </div>`;
+  } else {
+    uploadHtml = `
+      <div class="upload-area" onclick="document.getElementById('resultImgInput').click()">
+        <div class="ua-icon">🖼️</div>
+        <div class="ua-title">Opal에서 만든 결과 이미지를 업로드하세요</div>
+        <div class="ua-hint">탭하여 이미지 선택 · 발표 요약 카드에 함께 표시됩니다</div>
+      </div>`;
+  }
+  uploadHtml += `<input type="file" id="resultImgInput" accept="image/*" style="display:none" onchange="handleImageUpload(this)">`;
+
+  el.innerHTML = `
+    <div class="mission-brief" style="margin-bottom:24px">
+      <div class="mb-icon">🎯</div>
+      <div class="mb-text">
+        <div class="mb-client">👤 ${currentMission.client}</div>
+        <div class="mb-req">${currentMission.request}</div>
+      </div>
+    </div>
+    ${uploadHtml}
+    <div class="guide-question">
+      <div class="gq-q">1. 클라이언트의 핵심 니즈를 어떻게 파악했나요?</div>
+      <div class="gq-hint">"의뢰인이 ___을 원한다고 판단했고, 그래서 ___한 방향으로 설계했습니다."</div>
+    </div>
+    <div class="input-group">
+      <textarea class="team-input" placeholder="팀의 설계 근거를 적어주세요..." oninput="missionInputs.reason1=this.value">${missionInputs.reason1}</textarea>
+    </div>
+    <div class="guide-question">
+      <div class="gq-q">2. 필수 조건(${currentMission.must.join(', ')})을 어떻게 반영했나요?</div>
+      <div class="gq-hint">"${currentMission.must[0]}을(를) 통해 ___한 효과를 주었고..."</div>
+    </div>
+    <div class="input-group">
+      <textarea class="team-input" placeholder="필수 조건 반영 방법을 설명해주세요..." oninput="missionInputs.reason2=this.value">${missionInputs.reason2}</textarea>
+    </div>
+    <div class="guide-question">
+      <div class="gq-q">3. 이 공간에 들어간 클라이언트는 어떤 기분이 들까요?</div>
+      <div class="gq-hint">최종 결과를 한 문장으로 설명해보세요.</div>
+    </div>
+    <div class="input-group">
+      <textarea class="team-input" placeholder="기대되는 결과를 적어주세요..." oninput="missionInputs.reason3=this.value">${missionInputs.reason3}</textarea>
+    </div>
+
+    <div class="present-card" id="presentCard">
+      <h3>📋 발표 요약 카드</h3>
+      ${uploadedImage ? `<img src="${uploadedImage}" alt="결과 이미지" style="width:100%;border-radius:10px;margin-bottom:16px;">` : ''}
+      <div class="present-row"><div class="pr-label">클라이언트</div><div class="pr-value">${currentMission.client}</div></div>
+      <div class="present-row"><div class="pr-label">공간</div><div class="pr-value">${space?.name||'-'}</div></div>
+      <div class="present-row"><div class="pr-label">디자인 컨셉</div><div class="pr-value">${missionInputs.concept||'(컨셉 단계에서 입력)'}</div></div>
+      <div class="present-row"><div class="pr-label">사용한 키워드</div><div class="pr-value">${kw.join(', ')||'(미선택)'}</div></div>
+      <div class="present-row"><div class="pr-label">필수 조건 반영</div><div class="pr-value">${currentMission.must.join(', ')}</div></div>
+    </div>
+    <div class="tip-box" style="margin-top:20px"><div class="tip-label">발표 팁</div>30초~1분 이내로! "저희 팀은 ___한 컨셉으로, ___를 활용해서, 클라이언트가 ___를 느낄 수 있는 공간을 만들었습니다." 이 구조면 충분합니다.</div>
+
+    <div class="submit-section">
+      <h3>📤 결과 제출</h3>
+      <div class="team-name-row">
+        <input type="text" class="team-name-input" id="teamNameInput" placeholder="팀 이름을 입력하세요 (예: 1조, A팀)" value="${missionInputs.teamName||''}" oninput="missionInputs.teamName=this.value">
+        <button class="btn-submit" id="submitBtn" onclick="submitResult()">제출하기</button>
+      </div>
+      <div class="submit-status" id="submitStatus"></div>
+    </div>
+  `;
+}
+
+function updateMissionNav() {
+  const info = document.getElementById('navInfo');
+  const btns = document.getElementById('navBtns');
+  const stepName = MISSION_STEPS[currentStep].label;
+
+  if (currentStep === 5) {
+    // Last step
+    info.innerHTML = `🎯 미션 모드 · <span class="chosen">발표 준비</span>`;
+    btns.innerHTML = `
+      <button class="btn btn-back" onclick="missionBack()">← 이전</button>
+      <button class="btn btn-copy2" id="missionCopyBtn" onclick="copyMissionPrompt()">프롬프트 복사</button>
+      <button class="btn btn-home" onclick="goHome()">🏠 처음으로</button>
+    `;
+  } else {
+    info.innerHTML = `🎯 미션 모드 · Step ${currentStep+1}. ${stepName}`;
+    let h = '';
+    if (currentStep > 0) h += `<button class="btn btn-back" onclick="missionBack()">← 이전</button>`;
+    const isDesign = currentStep === 3;
+    h += `<button class="btn btn-next ${isDesign?'finish':''}" onclick="missionNext()">${currentStep===4?'발표 준비 →':'다음 →'}</button>`;
+    btns.innerHTML = h;
+  }
+}
+
+function missionNext() { if(currentStep<MISSION_STEPS.length-1){currentStep++;renderMissionStep();window.scrollTo({top:0,behavior:'smooth'});} }
+function missionBack() { if(currentStep>0){currentStep--;renderMissionStep();window.scrollTo({top:0,behavior:'smooth'});} }
+
+function copyMissionPrompt() {
+  const prompt = buildMissionPromptText();
+  if(!prompt.full) return;
+  navigator.clipboard.writeText(prompt.full).then(()=>{
+    const btn=document.getElementById('missionCopyBtn');btn.textContent='복사 완료!';btn.classList.add('done');
+    setTimeout(()=>{btn.textContent='프롬프트 복사';btn.classList.remove('done');},2000);
+  });
+}
+
+// 이미지를 작게 리사이즈하는 헬퍼 (시트 저장용)
+function resizeImage(dataUrl, maxW, quality) {
+  return new Promise((resolve) => {
+    if (!dataUrl) { resolve(''); return; }
+    const img = new Image();
+    img.onload = () => {
+      const ratio = Math.min(maxW / img.width, 1);
+      const w = Math.round(img.width * ratio);
+      const h = Math.round(img.height * ratio);
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      resolve(c.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = () => resolve('');
+    img.src = dataUrl;
+  });
+}
+
+function submitResult() {
+  const teamName = (missionInputs.teamName || '').trim();
+  if (!teamName) {
+    document.getElementById('submitStatus').textContent = '⚠️ 팀 이름을 입력해주세요!';
+    document.getElementById('teamNameInput').focus();
+    return;
+  }
+  if (!APPS_SCRIPT_URL) {
+    document.getElementById('submitStatus').textContent = '⚠️ 제출 URL이 설정되지 않았습니다. 교수님께 문의하세요.';
+    return;
+  }
+
+  const btn = document.getElementById('submitBtn');
+  const status = document.getElementById('submitStatus');
+  btn.disabled = true;
+  btn.textContent = '이미지 압축 중...';
+  status.textContent = '';
+
+  const prompt = buildMissionPromptText();
+  const space = spaces.find(s => s.id === sel.space);
+
+  // 이미지를 400px로 축소 + JPEG 70% 품질로 압축 (시트 셀 크기 제한 대응)
+  resizeImage(uploadedImage, 400, 0.7).then(smallImage => {
+    btn.textContent = '제출 중...';
+
+    const payload = {
+      teamName: teamName,
+      client: currentMission ? currentMission.client : '',
+      space: space ? space.name : '',
+      concept: missionInputs.concept || '',
+      analysis1: missionInputs.analysis1 || '',
+      analysis2: missionInputs.analysis2 || '',
+      analysis3: missionInputs.analysis3 || '',
+      style: sel.style || '',
+      mood: sel.mood || '',
+      light: sel.light || '',
+      material: sel.material || '',
+      color: sel.color || '',
+      furniture: sel.furniture || '',
+      deco: sel.deco || '',
+      prompt: prompt.full || '',
+      reason1: missionInputs.reason1 || '',
+      reason2: missionInputs.reason2 || '',
+      reason3: missionInputs.reason3 || '',
+      imageBase64: smallImage
+    };
+
+    fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+    .then(() => {
+      btn.textContent = '✅ 제출 완료!';
+      btn.style.background = '#27ae60';
+      status.textContent = '제출이 완료되었습니다! 교수님 화면에서 확인할 수 있습니다.';
+      status.style.color = '#27ae60';
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.textContent = '다시 제출';
+        btn.style.background = '';
+    }, 5000);
+  })
+  .catch(err => {
+    btn.disabled = false;
+    btn.textContent = '제출하기';
+    status.textContent = '⚠️ 제출 실패: 네트워크를 확인해주세요.';
+    status.style.color = '#e74c3c';
+  });
+  });
+}
+</script>
+</body>
+</html>
