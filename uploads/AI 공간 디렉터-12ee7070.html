@@ -9,7 +9,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,300..900,0..100,0..1&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="deck-stage.js"></script>
-<script src="https://unpkg.com/qrcode-generator@1.4.4/qrcode.js"></script>
 <style>
   :root{
     --ink: #1a1a1a;
@@ -764,16 +763,11 @@
   }
   .s-recap .item .tag{
     position:absolute; top:24px; left: 24px;
-    z-index: 2;
     font-family: var(--mono); font-size: 12px; letter-spacing:0.18em; text-transform:uppercase;
     background: var(--ink); color: var(--paper); padding: 6px 12px;
   }
   .s-recap .item.b .tag{ background: var(--accent); }
   .s-recap .item .glyph{ width: 140px; height: 140px; opacity:0.5; }
-  .s-recap .item .img img{
-    position:absolute; inset:0; width:100%; height:100%;
-    object-fit: cover; display:block;
-  }
   .s-recap .item .cap{
     padding: 32px 36px;
   }
@@ -1032,17 +1026,10 @@
   .skill-card .sk-icon svg{ width:28px; height:28px; stroke: var(--paper); fill:none; stroke-width:1.5; }
   .skill-card .sk-num{ font-family: var(--mono); font-size:12px; letter-spacing:0.18em; color: var(--muted); }
   .skill-card .sk-title{ font-family: var(--serif); font-weight:300; font-size:32px; line-height:1.1; }
-  .skill-card .sk-desc{ font-size:19px; line-height:1.55; color: var(--ink-2); flex:1; }
-  .skill-card .sk-divider{
-    margin:8px 0; height:90px; display:flex; align-items:center; justify-content:center;
-    color: var(--accent);
-    border-top:1px dashed var(--line);
-    border-bottom:1px dashed var(--line);
-  }
-  .skill-card .sk-divider svg{ width:auto; height:80px; display:block; }
+  .skill-card .sk-desc{ font-size:16px; line-height:1.5; color: var(--ink-2); flex:1; }
   .skill-card .sk-tag{
-    margin-top:8px; padding:8px 16px; border:1px solid var(--accent); border-radius:999px;
-    font-family: var(--mono); font-size:13px; letter-spacing:0.14em; text-transform:uppercase;
+    margin-top:8px; padding:6px 14px; border:1px solid var(--accent); border-radius:999px;
+    font-family: var(--mono); font-size:11px; letter-spacing:0.14em; text-transform:uppercase;
     color: var(--accent); align-self:flex-start;
   }
 
@@ -1106,11 +1093,11 @@
   }
   .s-closing h2 .em{ color: var(--accent); font-style:italic; }
   .s-closing .close-sub{
-    margin-top:36px; font-size:26px; line-height:1.5; color: rgba(244,239,232,0.7);
+    margin-top:48px; font-size:28px; line-height:1.5; color: rgba(244,239,232,0.7);
     max-width:1200px;
   }
   .s-closing .close-info{
-    margin-top:40px; padding-top:24px; border-top:1px solid rgba(244,239,232,0.2);
+    margin-top:56px; padding-top:32px; border-top:1px solid rgba(244,239,232,0.2);
     display:flex; gap:80px;
   }
   .s-closing .close-info .col .label{
@@ -1120,87 +1107,6 @@
   .s-closing .close-info .col .val{
     font-size:22px; color: var(--paper);
   }
-
-  /* links page */
-  .s-links{ background: var(--paper); }
-  .s-links .body{ position:absolute; left:96px; right:96px; top: 200px; bottom: 160px; display:flex; flex-direction:column; }
-  .s-links h2{
-    font-family: var(--serif); font-weight:300; font-size:84px; line-height:1; letter-spacing:-0.02em;
-  }
-  .s-links h2 .em{ font-style:italic; color: var(--accent); }
-  .s-links .links-grid{
-    margin-top:48px; display:grid; grid-template-columns: 1.6fr 1fr 1fr; gap:28px; flex:1;
-  }
-  .s-links .link-card{
-    border:1px solid var(--ink); background: var(--paper);
-    padding:36px 32px;
-    display:flex; flex-direction:column; gap:18px;
-    text-decoration:none; color: var(--ink);
-    position:relative;
-    transition: background 0.2s, transform 0.2s;
-  }
-  .s-links .link-card:hover{
-    background: var(--paper-2);
-    transform: translateY(-2px);
-  }
-  .s-links .link-card--featured{
-    background: var(--paper-2);
-    border-width:1.5px;
-  }
-  .s-links .lc-tag{
-    position:absolute; top:-1px; right:32px;
-    background: var(--accent); color: var(--paper);
-    font-family: var(--mono); font-size:11px; letter-spacing:0.18em;
-    padding:6px 12px;
-  }
-  .s-links .lc-icon{
-    width:56px; height:56px; color: var(--ink);
-  }
-  .s-links .lc-icon svg{ width:100%; height:100%; }
-  .s-links .lc-title{
-    display:flex; align-items:baseline; gap:14px;
-    margin-top:auto;
-  }
-  .s-links .link-card--featured .lc-title{ margin-top:8px; }
-  .s-links .lc-num{
-    font-family: var(--mono); font-size:13px; letter-spacing:0.18em;
-    color: var(--muted);
-  }
-  .s-links .lc-name{
-    font-family: var(--serif); font-weight:300; font-size:42px; line-height:1;
-  }
-  .s-links .link-card--featured .lc-name{ font-size:54px; }
-  .s-links .lc-desc{
-    font-size:18px; line-height:1.55; color: var(--ink-2);
-    flex:1;
-  }
-  .s-links .link-card--featured .lc-desc{ font-size:20px; }
-  .s-links .lc-bottom{
-    display:flex; align-items:center; gap:24px;
-    border-top:1px solid var(--line); padding-top:24px;
-    margin-top:auto;
-  }
-  .s-links .lc-qr{
-    width:140px; height:140px; flex-shrink:0;
-    border:1px solid var(--ink); padding:10px;
-    background: var(--paper);
-  }
-  .s-links .lc-qr svg{ width:100%; height:100%; display:block; }
-  .s-links .lc-url-block{
-    display:flex; flex-direction:column; gap:6px;
-  }
-  .s-links .lc-url-block--simple{
-    border-top:1px solid var(--line); padding-top:18px; margin-top:auto;
-  }
-  .s-links .lc-label{
-    font-family: var(--mono); font-size:11px; letter-spacing:0.18em;
-    color: var(--muted); text-transform:uppercase;
-  }
-  .s-links .lc-url{
-    font-family: var(--mono); font-size:18px; color: var(--ink);
-    letter-spacing:0.02em; word-break:break-all;
-  }
-  .s-links .link-card--featured .lc-url{ font-size:20px; }
 
 </style>
 </head>
@@ -1749,7 +1655,7 @@
     </h1>
   </div>
 
-  <div class="stamp">- 오늘의 핵심 명제</div>
+  <div class="stamp">— 오늘의 핵심 명제</div>
 
   <div class="footer">
     <div style="font-family: Pretendard">Part 3 · 핵심 명제</div>
@@ -1956,8 +1862,14 @@
     <div class="grid">
       <div class="item a" data-anim="up" style="--anim-delay: 700ms;">
         <div class="img">
-          <img src="assets/17-run01-bright.png" alt="\ubc1d\uace0 \ucc28\ubd84\ud55c \uac70\uc2e4">
           <span class="tag">RUN 01</span>
+          <svg class="glyph" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1">
+            <rect x="14" y="22" width="72" height="56"/>
+            <rect x="22" y="40" width="20" height="20"/>
+            <line x1="56" y1="40" x2="76" y2="40"/>
+            <line x1="56" y1="48" x2="72" y2="48"/>
+            <line x1="56" y1="56" x2="76" y2="56"/>
+          </svg>
         </div>
         <div class="cap">
           <div class="kw">
@@ -1973,8 +1885,14 @@
 
       <div class="item b" data-anim="up" style="--anim-delay: 1000ms;">
         <div class="img">
-          <img src="assets/17-run02-moody.png" alt="긴장감 있는 무드 거실">
           <span class="tag">RUN 02</span>
+          <svg class="glyph" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1">
+            <rect x="14" y="22" width="72" height="56"/>
+            <circle cx="32" cy="50" r="10"/>
+            <line x1="56" y1="40" x2="76" y2="40"/>
+            <line x1="56" y1="50" x2="76" y2="50"/>
+            <line x1="56" y1="60" x2="68" y2="60"/>
+          </svg>
         </div>
         <div class="cap">
           <div class="kw">
@@ -2039,7 +1957,8 @@
 
     <div class="url" data-anim="up" style="--anim-delay: 1450ms;">
       <span class="lbl">PC에서 접속 →</span>
-      <span class="addr">oasbal.github.io/space-mood-lab/<span class="cursor"></span></span>
+      <span class="addr">[강의 당일 안내]<span class="cursor"></span></span>
+      <span style="margin-left: 24px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-2);">Opal 앱 배포 후 실제 URL로 교체</span>
     </div>
   </div>
 
@@ -2062,7 +1981,7 @@
   <div class="body">
     <div class="partno">Part 04</div>
     <h2>AI 시대,<br><span class="ital">디자인 교육의</span><br>새 방향.</h2>
-    <div class="lede" style="font-family: Pretendard; white-space: nowrap; max-width: none;"></div>
+    <div class="lede" style="font-family: Pretendard; white-space: nowrap; max-width: none;">오늘 여러분이 체험한 것은 시작일 뿐입니다. 이 변화를 3년간 깊이 배울 수 있는 곳이 있습니다.</div>
   </div>
 
   <div class="legend">
@@ -2091,9 +2010,9 @@
 
     <div class="era-compare">
       <div class="era-box old" data-anim="up" style="--anim-delay: 700ms;">
-        <div class="era-label" style="font-family: Pretendard">Before · 기존 교육</div>
+        <div class="era-label">Before · 기존 교육</div>
         <div class="era-title">도구 <span style="font-style:italic">숙련</span> 중심</div>
-        <div class="era-list" style="line-height: 2">
+        <div class="era-list">
           도면 제도·3D 소프트웨어에 수 년<br>
           기술 습득에 시간의 대부분 소모<br>
           결과물을 보기까지 긴 시간 필요<br>
@@ -2102,13 +2021,13 @@
       </div>
       <div class="era-arrow" data-anim="fade" style="--anim-delay: 1000ms;">→</div>
       <div class="era-box new" data-anim="up" style="--anim-delay: 1100ms;">
-        <div class="era-label" style="font-family: Pretendard">After · 우리 학과의 교육</div>
+        <div class="era-label">After · 우리 학과의 교육</div>
         <div class="era-title">A.I 증강 <span style="font-style:italic; color: var(--accent);">디자이너</span></div>
-        <div class="era-list" style="line-height: 2">
-          단어로 공간을 구상하고 즉시 시각화<br>
-          기술 습득의 시간을 컨셉·기획에 투자<br>
-          결과를 보며 빠르게 다듬는 반복 학습<br>
-          '공간을 디렉팅하는 디자이너' 양성
+        <div class="era-list">
+          AI로 완성도 높은 결과를 먼저 경험<br>
+          학습의 즐거움이 기술적 고통을 압도<br>
+          현장 문제를 소통하고 해결하는 실무자<br>
+          기술은 AI가, 방향과 판단은 사람이
         </div>
       </div>
     </div>
@@ -2136,8 +2055,15 @@
 
     <div style="margin-top:36px; display:grid; grid-template-columns: repeat(4,1fr); gap:24px; flex:1;">
       <div style="border:1px solid var(--ink); display:flex; flex-direction:column; overflow:hidden;" data-anim="up" style="--anim-delay: 600ms;">
-        <div style="flex:1; background: var(--paper-2); display:flex; align-items:center; justify-content:center; overflow:hidden;">
-          <img src="assets/skill-01-field.png" alt="現장 직무" style="width:100%; height:100%; object-fit:cover; display:block; mix-blend-mode: multiply;"/>
+        <div style="flex:1; background: var(--paper-2); display:flex; align-items:center; justify-content:center; padding:32px;">
+          <svg viewBox="0 0 120 120" fill="none" stroke="var(--ink)" stroke-width="1.2" style="width:100%; max-height:140px;">
+            <rect x="20" y="30" width="80" height="60" rx="3"/>
+            <rect x="30" y="45" width="25" height="20" rx="2" fill="var(--paper-3)"/>
+            <line x1="65" y1="50" x2="90" y2="50"/>
+            <line x1="65" y1="58" x2="85" y2="58"/>
+            <path d="M30 80 L50 80 L50 90 L70 90" stroke="var(--accent)" stroke-width="1.5"/>
+            <circle cx="75" cy="90" r="5" stroke="var(--accent)" fill="none" stroke-width="1.5"/>
+          </svg>
         </div>
         <div style="padding:24px; border-top:1px solid var(--ink);">
           <div style="font-family: var(--mono); font-size:11px; letter-spacing:0.16em; color: var(--muted);">01</div>
@@ -2147,8 +2073,14 @@
       </div>
 
       <div style="border:1px solid var(--ink); display:flex; flex-direction:column; overflow:hidden;" data-anim="up" style="--anim-delay: 800ms;">
-        <div style="flex:1; background: var(--paper-2); display:flex; align-items:center; justify-content:center; overflow:hidden;">
-          <img src="assets/skill-02-create.png" alt="창의 융합" style="width:100%; height:100%; object-fit:cover; display:block; mix-blend-mode: multiply;"/>
+        <div style="flex:1; background: var(--paper-2); display:flex; align-items:center; justify-content:center; padding:32px;">
+          <svg viewBox="0 0 120 120" fill="none" stroke="var(--ink)" stroke-width="1.2" style="width:100%; max-height:140px;">
+            <circle cx="40" cy="55" r="18" stroke-dasharray="4 3"/>
+            <circle cx="80" cy="55" r="18" stroke-dasharray="4 3"/>
+            <circle cx="60" cy="80" r="18" stroke-dasharray="4 3"/>
+            <path d="M55 50 L65 50 M55 60 L65 60" stroke="var(--accent)" stroke-width="1.8"/>
+            <circle cx="60" cy="55" r="6" fill="var(--accent)" opacity="0.15" stroke="var(--accent)" stroke-width="1.5"/>
+          </svg>
         </div>
         <div style="padding:24px; border-top:1px solid var(--ink);">
           <div style="font-family: var(--mono); font-size:11px; letter-spacing:0.16em; color: var(--muted);">02</div>
@@ -2158,8 +2090,15 @@
       </div>
 
       <div style="border:1px solid var(--ink); display:flex; flex-direction:column; overflow:hidden;" data-anim="up" style="--anim-delay: 1000ms;">
-        <div style="flex:1; background: var(--paper-2); display:flex; align-items:center; justify-content:center; overflow:hidden;">
-          <img src="assets/skill-03-communicate.png" alt="소통 공감" style="width:100%; height:100%; object-fit:cover; display:block; mix-blend-mode: multiply;"/>
+        <div style="flex:1; background: var(--paper-2); display:flex; align-items:center; justify-content:center; padding:32px;">
+          <svg viewBox="0 0 120 120" fill="none" stroke="var(--ink)" stroke-width="1.2" style="width:100%; max-height:140px;">
+            <circle cx="40" cy="50" r="12"/>
+            <circle cx="80" cy="50" r="12"/>
+            <path d="M52 50 C58 42, 68 42, 68 50" stroke="var(--accent)" stroke-width="1.5"/>
+            <path d="M52 50 C58 58, 68 58, 68 50" stroke="var(--accent)" stroke-width="1.5"/>
+            <path d="M35 68 Q60 95, 85 68" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="4 3"/>
+            <circle cx="60" cy="88" r="4" fill="var(--accent)" opacity="0.3" stroke="var(--accent)"/>
+          </svg>
         </div>
         <div style="padding:24px; border-top:1px solid var(--ink);">
           <div style="font-family: var(--mono); font-size:11px; letter-spacing:0.16em; color: var(--muted);">03</div>
@@ -2169,8 +2108,15 @@
       </div>
 
       <div style="border:1px solid var(--ink); display:flex; flex-direction:column; overflow:hidden;" data-anim="up" style="--anim-delay: 1200ms;">
-        <div style="flex:1; background: var(--paper-2); display:flex; align-items:center; justify-content:center; overflow:hidden;">
-          <img src="assets/skill-04-grow.png" alt="자기 계발" style="width:100%; height:100%; object-fit:cover; display:block; mix-blend-mode: multiply;"/>
+        <div style="flex:1; background: var(--paper-2); display:flex; align-items:center; justify-content:center; padding:32px;">
+          <svg viewBox="0 0 120 120" fill="none" stroke="var(--ink)" stroke-width="1.2" style="width:100%; max-height:140px;">
+            <path d="M30 85 L50 55 L70 65 L90 35" stroke="var(--accent)" stroke-width="2"/>
+            <circle cx="30" cy="85" r="4" fill="var(--accent)"/>
+            <circle cx="50" cy="55" r="4" fill="var(--accent)"/>
+            <circle cx="70" cy="65" r="4" fill="var(--accent)"/>
+            <circle cx="90" cy="35" r="4" fill="var(--accent)"/>
+            <path d="M85 40 L90 35 L95 42" stroke="var(--accent)" stroke-width="1.5"/>
+          </svg>
         </div>
         <div style="padding:24px; border-top:1px solid var(--ink);">
           <div style="font-family: var(--mono); font-size:11px; letter-spacing:0.16em; color: var(--muted);">04</div>
@@ -2206,22 +2152,10 @@
         <div class="sk-icon">
           <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
         </div>
-        <div class="sk-num" style="font-family: Pretendard"></div>
+        <div class="sk-num" style="font-family: Pretendard">OUTCOME-FIRST</div>
         <div class="sk-title">결과 중심 <span style="font-style:italic">학습</span></div>
-        <div class="sk-desc" style="line-height: 1.8">AI로 완성도 높은 결과물을 먼저 경험합니다. 학습의 즐거움이 기술적 고통을 압도하는 역방향 학습.</div>
-        <div class="sk-divider" aria-hidden="true">
-          <svg viewBox="0 0 160 80" fill="none" stroke="currentColor" stroke-width="1.4">
-            <path d="M8 70 L40 70 L60 38 L88 38 L108 16 L152 16" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M144 10 L152 16 L146 24" stroke-linecap="round" stroke-linejoin="round"/>
-            <circle cx="60" cy="38" r="3.5" fill="currentColor" stroke="none"/>
-            <circle cx="88" cy="38" r="3.5" fill="currentColor" stroke="none"/>
-            <circle cx="108" cy="16" r="3.5" fill="currentColor" stroke="none"/>
-            <path d="M8 70 L8 6" stroke="currentColor" stroke-width="0.8" opacity="0.5"/>
-            <path d="M8 70 L156 70" stroke="currentColor" stroke-width="0.8" opacity="0.5"/>
-            <text x="14" y="14" font-family="ui-monospace, monospace" font-size="7" fill="currentColor" stroke="none" opacity="0.7">RESULT</text>
-          </svg>
-        </div>
-        <div class="sk-tag" style="font-family: Pretendard">오늘 체험한 방식</div>
+        <div class="sk-desc">AI로 완성도 높은 결과물을 먼저 경험합니다. 학습의 즐거움이 기술적 고통을 압도하는 역방향 학습.</div>
+        <div class="sk-tag">오늘 체험한 방식</div>
       </div>
 
       <div class="skill-card" data-anim="up" style="--anim-delay: 800ms;">
@@ -2230,23 +2164,8 @@
         </div>
         <div class="sk-num" style="font-family: Pretendard">A.I WORKFLOW</div>
         <div class="sk-title">AI 증강 <span style="font-style:italic">워크플로우</span></div>
-        <div class="sk-desc" style="line-height: 1.8">구상부터 시각화까지 전 과정을 AI로 지능화. 10종 실전 도구를 완벽히 마스터합니다.</div>
-        <div class="sk-divider" aria-hidden="true">
-          <svg viewBox="0 0 160 80" fill="none" stroke="currentColor" stroke-width="1.4">
-            <rect x="8" y="30" width="24" height="20" rx="2"/>
-            <path d="M14 38 L26 38 M14 44 L22 44" stroke-width="1"/>
-            <path d="M32 40 L52 40" stroke-dasharray="3 2"/>
-            <circle cx="66" cy="40" r="14"/>
-            <path d="M58 40 L66 40 M66 32 L66 40 L72 46" stroke-linecap="round"/>
-            <path d="M80 40 L100 40" stroke-dasharray="3 2"/>
-            <rect x="100" y="30" width="24" height="20" rx="2"/>
-            <path d="M106 36 L118 36 M106 40 L116 40 M106 44 L120 44" stroke-width="1"/>
-            <path d="M124 40 L144 40" stroke-linecap="round"/>
-            <path d="M138 34 L144 40 L138 46" stroke-linecap="round" stroke-linejoin="round"/>
-            <circle cx="152" cy="40" r="4" fill="currentColor" stroke="none"/>
-          </svg>
-        </div>
-        <div class="sk-tag" style="font-family: Pretendard">생산성 압도</div>
+        <div class="sk-desc">구상부터 시각화까지 전 과정을 AI로 지능화. 10종 실전 도구를 완벽히 마스터합니다.</div>
+        <div class="sk-tag">생산성 압도</div>
       </div>
 
       <div class="skill-card" data-anim="up" style="--anim-delay: 1000ms;">
@@ -2255,27 +2174,8 @@
         </div>
         <div class="sk-num" style="font-family: Pretendard">HYPER-LOCAL PBL</div>
         <div class="sk-title">현장 밀착 <span style="font-style:italic">프로젝트</span></div>
-        <div class="sk-desc" style="line-height: 1.8">인근 상권 대상 'A.I 디자인 앰뷸런스' 등 실제 현장에서 성공 경험을 쌓습니다.</div>
-        <div class="sk-divider" aria-hidden="true">
-          <svg viewBox="0 0 160 80" fill="none" stroke="currentColor" stroke-width="1.4">
-            <path d="M4 70 L156 70"/>
-            <rect x="14" y="42" width="20" height="28" fill="currentColor" fill-opacity="0.12"/>
-            <path d="M14 50 L34 50 M14 58 L34 58 M24 42 L24 70" stroke-width="0.8"/>
-            <rect x="38" y="30" width="24" height="40"/>
-            <path d="M38 40 L62 40 M38 50 L62 50 M38 60 L62 60 M50 30 L50 70" stroke-width="0.8"/>
-            <path d="M48 60 L52 60 L52 70 L48 70 Z" fill="currentColor" stroke="none"/>
-            <path d="M68 50 L80 38 L92 50 L92 70 L68 70 Z" fill="currentColor" fill-opacity="0.12"/>
-            <path d="M80 38 L80 32 L84 32 L84 36"/>
-            <path d="M76 60 L84 60 L84 70 L76 70 Z" fill="currentColor" stroke="none"/>
-            <rect x="96" y="36" width="22" height="34"/>
-            <path d="M96 46 L118 46 M96 56 L118 56 M107 36 L107 70" stroke-width="0.8"/>
-            <rect x="122" y="24" width="28" height="46" fill="currentColor" fill-opacity="0.12"/>
-            <path d="M122 34 L150 34 M122 44 L150 44 M122 54 L150 54 M122 64 L150 64 M136 24 L136 70" stroke-width="0.8"/>
-            <circle cx="80" cy="18" r="5"/>
-            <path d="M80 12 L80 8 M80 24 L80 28" stroke-width="1"/>
-          </svg>
-        </div>
-        <div class="sk-tag" style="font-family: Pretendard">실전 포트폴리오</div>
+        <div class="sk-desc">인근 상권 대상 'A.I 디자인 앰뷸런스' 등 실제 현장에서 성공 경험을 쌓습니다.</div>
+        <div class="sk-tag">실전 포트폴리오</div>
       </div>
 
       <div class="skill-card" data-anim="up" style="--anim-delay: 1200ms;">
@@ -2284,19 +2184,8 @@
         </div>
         <div class="sk-num" style="font-family: Pretendard">MICRO DEGREE</div>
         <div class="sk-title">마이크로 <span style="font-style:italic">디그리</span></div>
-        <div class="sk-desc" style="line-height: 1.8">A.I 공간 시각화 특화 인증(12학점). 졸업과 동시에 AI 전문성을 공식 증명합니다.</div>
-        <div class="sk-divider" aria-hidden="true">
-          <svg viewBox="0 0 160 80" fill="none" stroke="currentColor" stroke-width="1.4">
-            <path d="M30 14 L80 4 L130 14 L130 36 C130 54, 105 68, 80 74 C55 68, 30 54, 30 36 Z"/>
-            <path d="M30 14 L130 14" stroke-width="0.8" opacity="0.6"/>
-            <path d="M64 40 L74 50 L96 28" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <text x="80" y="68" text-anchor="middle" font-family="ui-monospace, monospace" font-size="6" fill="currentColor" stroke="none" letter-spacing="1">12 CREDITS</text>
-            <path d="M14 60 L26 60 M134 60 L146 60" stroke-width="0.8" opacity="0.6"/>
-            <circle cx="10" cy="60" r="2" fill="currentColor" stroke="none"/>
-            <circle cx="150" cy="60" r="2" fill="currentColor" stroke="none"/>
-          </svg>
-        </div>
-        <div class="sk-tag" style="font-family: Pretendard">차별화된 경쟁력</div>
+        <div class="sk-desc">A.I 공간 시각화 특화 인증(12학점). 졸업과 동시에 AI 전문성을 공식 증명합니다.</div>
+        <div class="sk-tag">차별화된 경쟁력</div>
       </div>
     </div>
   </div>
@@ -2332,41 +2221,41 @@
 
         <div style="text-align:center; padding:0 16px;" data-anim="up" style="--anim-delay: 500ms;">
           <div style="width:52px; height:52px; border-radius:50%; background: var(--paper); border:2px solid var(--ink); margin:0 auto; display:flex; align-items:center; justify-content:center; font-family: var(--serif); font-style:italic; font-size:22px; position:relative; z-index:2;">1</div>
-          <div style="margin-top:20px; padding:32px 22px; border:1px solid var(--ink); background: var(--paper); min-height:300px; display:flex; flex-direction:column; gap:20px;">
-            <div style="font-family: Pretendard; font-size: 13px; letter-spacing: 0.14em; color: var(--muted)">1-1 · 기초 입문</div>
-            <div style="font-family: var(--serif); font-weight:300; font-size:30px; line-height:1.2;"><span style="font-style:italic; color: var(--accent);">발견</span>하는 학기</div>
-            <div style="font-size: 18px; color: var(--ink-2); line-height: 1; flex: 1">공간을 보는 눈을 키우고, AI를 처음 만나 "나도 할 수 있다"는 자신감을 얻습니다</div>
-            <div style="font-family: Pretendard; font-size: 12px; letter-spacing: 0.1em; color: var(--accent); border-top: 1px solid var(--line); padding-top: 14px">드로잉 · 2D CAD · AI 탐험</div>
+          <div style="margin-top:20px; padding:24px 18px; border:1px solid var(--ink); background: var(--paper); min-height:220px; display:flex; flex-direction:column; gap:16px;">
+            <div style="font-family: var(--mono); font-size:11px; letter-spacing:0.14em; color: var(--muted);">1-1 · 기초 입문</div>
+            <div style="font-family: var(--serif); font-weight:300; font-size:24px; line-height:1.3;"><span style="font-style:italic; color: var(--accent);">발견</span>하는 학기</div>
+            <div style="font-size:15px; color: var(--ink-2); line-height:1.7; flex:1;">공간을 보는 눈을 키우고, AI를 처음 만나 "나도 할 수 있다"는 자신감을 얻습니다</div>
+            <div style="font-family: var(--mono); font-size:10px; letter-spacing:0.1em; color: var(--accent); border-top:1px solid var(--line); padding-top:10px;">드로잉 · 2D CAD · AI 탐험</div>
           </div>
         </div>
 
         <div style="text-align:center; padding:0 16px;" data-anim="up" style="--anim-delay: 750ms;">
           <div style="width:52px; height:52px; border-radius:50%; background: var(--paper); border:2px solid var(--ink); margin:0 auto; display:flex; align-items:center; justify-content:center; font-family: var(--serif); font-style:italic; font-size:22px; position:relative; z-index:2;">2</div>
-          <div style="margin-top:20px; padding:32px 22px; border:1px solid var(--ink); background: var(--paper); min-height:300px; display:flex; flex-direction:column; gap:20px;">
-            <div style="font-family: Pretendard; font-size: 13px; letter-spacing: 0.14em; color: var(--muted)">1-2 · 주거 실무</div>
-            <div style="font-family: var(--serif); font-weight:300; font-size:30px; line-height:1.2;"><span style="font-style:italic; color: var(--accent);">만드는</span> 학기</div>
-            <div style="font-size: 18px; color: var(--ink-2); line-height: 2; flex: 1">실제 주거 공간을 설계하고 3D로 구현하며 AI 시각화를 실전에 적용합니다</div>
-            <div style="font-family: Pretendard; font-size: 12px; letter-spacing: 0.1em; color: var(--accent); border-top: 1px solid var(--line); padding-top: 14px">3D 모델링 · 시공 · AI 시각화</div>
+          <div style="margin-top:20px; padding:24px 18px; border:1px solid var(--ink); background: var(--paper); min-height:220px; display:flex; flex-direction:column; gap:16px;">
+            <div style="font-family: var(--mono); font-size:11px; letter-spacing:0.14em; color: var(--muted);">1-2 · 주거 실무</div>
+            <div style="font-family: var(--serif); font-weight:300; font-size:24px; line-height:1.3;"><span style="font-style:italic; color: var(--accent);">만드는</span> 학기</div>
+            <div style="font-size:15px; color: var(--ink-2); line-height:1.7; flex:1;">실제 주거 공간을 설계하고 3D로 구현하며 AI 시각화를 실전에 적용합니다</div>
+            <div style="font-family: var(--mono); font-size:10px; letter-spacing:0.1em; color: var(--accent); border-top:1px solid var(--line); padding-top:10px;">3D 모델링 · 시공 · AI 시각화</div>
           </div>
         </div>
 
         <div style="text-align:center; padding:0 16px;" data-anim="up" style="--anim-delay: 1000ms;">
           <div style="width:52px; height:52px; border-radius:50%; background: var(--ink); border:2px solid var(--ink); margin:0 auto; display:flex; align-items:center; justify-content:center; font-family: var(--serif); font-style:italic; font-size:22px; color: var(--paper); position:relative; z-index:2;">3</div>
-          <div style="margin-top:20px; padding:32px 22px; border:1px solid var(--ink); background: var(--paper); min-height:300px; display:flex; flex-direction:column; gap:20px;">
-            <div style="font-family: Pretendard; font-size: 13px; letter-spacing: 0.14em; color: var(--muted)">2-1 · 상업 고도화</div>
-            <div style="font-family: var(--serif); font-weight:300; font-size:30px; line-height:1.2;"><span style="font-style:italic; color: var(--accent);">깊어지는</span> 학기</div>
-            <div style="font-size: 18px; color: var(--ink-2); line-height: 2; flex: 1">브랜드 공간을 기획하고 법규·시공까지 다루며 전문가 수준의 AI 시각화를 익힙니다</div>
-            <div style="font-family: Pretendard; font-size: 12px; letter-spacing: 0.1em; color: var(--accent); border-top: 1px solid var(--line); padding-top: 14px">상업 설계 · 법규 · AI 심화</div>
+          <div style="margin-top:20px; padding:24px 18px; border:1px solid var(--ink); background: var(--paper); min-height:220px; display:flex; flex-direction:column; gap:16px;">
+            <div style="font-family: var(--mono); font-size:11px; letter-spacing:0.14em; color: var(--muted);">2-1 · 상업 고도화</div>
+            <div style="font-family: var(--serif); font-weight:300; font-size:24px; line-height:1.3;"><span style="font-style:italic; color: var(--accent);">깊어지는</span> 학기</div>
+            <div style="font-size:15px; color: var(--ink-2); line-height:1.7; flex:1;">브랜드 공간을 기획하고 법규·시공까지 다루며 전문가 수준의 AI 시각화를 익힙니다</div>
+            <div style="font-family: var(--mono); font-size:10px; letter-spacing:0.1em; color: var(--accent); border-top:1px solid var(--line); padding-top:10px;">상업 설계 · 법규 · AI 심화</div>
           </div>
         </div>
 
         <div style="text-align:center; padding:0 16px;" data-anim="up" style="--anim-delay: 1250ms;">
           <div style="width:52px; height:52px; border-radius:50%; background: var(--accent); border:2px solid var(--accent); margin:0 auto; display:flex; align-items:center; justify-content:center; font-family: var(--serif); font-style:italic; font-size:22px; color: var(--paper); position:relative; z-index:2;">4</div>
-          <div style="margin-top:20px; padding:32px 22px; border:1px solid var(--ink); background: var(--paper); min-height:300px; display:flex; flex-direction:column; gap:20px;">
-            <div style="font-family: Pretendard; font-size: 13px; letter-spacing: 0.14em; color: var(--muted)">2-2 · 통합·취업</div>
-            <div style="font-family: var(--serif); font-weight:300; font-size:30px; line-height:1.2;"><span style="font-style:italic; color: var(--accent);">증명하는</span> 학기</div>
-            <div style="font-size: 18px; color: var(--ink-2); line-height: 2; flex: 1">캡스톤 프로젝트로 포트폴리오를 완성하고, 마이크로 디그리를 취득하며 취업에 도전합니다</div>
-            <div style="font-family: Pretendard; font-size: 12px; letter-spacing: 0.1em; color: var(--accent); border-top: 1px solid var(--line); padding-top: 14px">캡스톤 · VR/AR · 포트폴리오</div>
+          <div style="margin-top:20px; padding:24px 18px; border:1px solid var(--ink); background: var(--paper); min-height:220px; display:flex; flex-direction:column; gap:16px;">
+            <div style="font-family: var(--mono); font-size:11px; letter-spacing:0.14em; color: var(--muted);">2-2 · 통합·취업</div>
+            <div style="font-family: var(--serif); font-weight:300; font-size:24px; line-height:1.3;"><span style="font-style:italic; color: var(--accent);">증명하는</span> 학기</div>
+            <div style="font-size:15px; color: var(--ink-2); line-height:1.7; flex:1;">캡스톤 프로젝트로 포트폴리오를 완성하고, 마이크로 디그리를 취득하며 취업에 도전합니다</div>
+            <div style="font-family: var(--mono); font-size:10px; letter-spacing:0.1em; color: var(--accent); border-top:1px solid var(--line); padding-top:10px;">캡스톤 · VR/AR · 포트폴리오</div>
           </div>
         </div>
 
@@ -2391,8 +2280,8 @@
   </div>
 
   <div class="body">
-    <div class="quotemark" style="font-family: var(--serif); font-style:italic; font-weight:300; font-size:200px; line-height:0.6; color: var(--accent-3); margin-bottom:0;" data-anim="fade">"</div>
-    <h2 data-anim="up" style="margin-top:-20px;">오늘 여러분이 고른<br>그 <span class="em">단어</span> 하나가,<br>미래의 <span class="em">첫 설계</span>입니다.</h2>
+    <div class="quotemark" style="font-family: var(--serif); font-style:italic; font-weight:300; font-size:240px; line-height:0.6; color: var(--accent-3); margin-bottom:0;" data-anim="fade">"</div>
+    <h2 data-anim="up" style="margin-top:-30px;">오늘 여러분이 고른<br>그 <span class="em">단어</span> 하나가,<br>미래의 <span class="em">첫 설계</span>입니다.</h2>
     <div class="close-sub" data-anim="up" style="--anim-delay: 500ms;">
       단어로 공간을 만드는 경험, 기억해주세요.<br>
       더 깊이 배우고 싶다면, 경남정보대학교 인테리어디자인과에서 기다리겠습니다.
@@ -2409,7 +2298,7 @@
       </div>
       <div class="col">
         <span class="label" style="font-family: Pretendard">Contact</span>
-        <span class="val" style="font-family: Pretendard">051) 320-1578</span>
+        <span class="val" style="font-family: Pretendard">입학처 문의</span>
       </div>
     </div>
   </div>
@@ -2417,86 +2306,6 @@
   <div class="footer">
     <div style="font-family: Pretendard">AI 공간 디렉터 · 단어가 공간을 만든다</div>
     <div class="pageno" style="color: var(--paper);">24</div>
-  </div>
-</section>
-
-<!-- ===================================================================== -->
-<!-- 25 / LINKS — 학과 채널 -->
-<!-- ===================================================================== -->
-<section class="s-links">
-  <div class="frame"></div>
-  <div class="meta">
-    <div class="l" style="font-family: Pretendard"><span class="dot"></span>Links</div>
-    <div class="r" style="font-family: Pretendard">경남정보대학교 인테리어디자인과</div>
-  </div>
-
-  <div class="body">
-    <div class="kicker" style="font-family: Pretendard" data-anim="up"><span class="num">+</span>더 알아보기</div>
-    <h2 data-anim="up" style="margin-top:24px;">우리 학과를 <span class="em">더</span> 만나보세요.</h2>
-
-    <div class="links-grid" data-anim="up" style="--anim-delay: 400ms;">
-      <!-- Card 1: 졸업작품 갤러리 (with QR) -->
-      <a class="link-card link-card--featured" href="http://idgallery.net/" target="_blank" rel="noopener">
-        <div class="lc-tag" style="font-family: Pretendard">FEATURED</div>
-        <div class="lc-title">
-          <span class="lc-num" style="font-family: Pretendard">01</span>
-          <span class="lc-name">졸업작품 <span style="font-style:italic; color: var(--accent);">갤러리</span></span>
-        </div>
-        <div class="lc-desc" style="font-family: Pretendard">2~4학년 학생들의 진짜 결과물을<br/>직접 둘러보세요.</div>
-        <div class="lc-bottom">
-          <div class="lc-qr" id="qr-gallery" aria-label="QR code for idgallery.net"></div>
-          <div class="lc-url-block">
-            <span class="lc-label" style="font-family: Pretendard">스캔 또는 방문</span>
-            <span class="lc-url">idgallery.net</span>
-          </div>
-        </div>
-      </a>
-
-      <!-- Card 2: 홈페이지 -->
-      <a class="link-card" href="https://interior.kit.ac.kr/" target="_blank" rel="noopener">
-        <div class="lc-icon" aria-hidden="true">
-          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path d="M8 22 L24 10 L40 22 L40 40 L8 40 Z"/>
-            <path d="M19 40 L19 28 L29 28 L29 40"/>
-            <path d="M4 24 L24 8 L44 24" stroke-width="1.2" opacity="0.5"/>
-          </svg>
-        </div>
-        <div class="lc-title">
-          <span class="lc-num" style="font-family: Pretendard">02</span>
-          <span class="lc-name">학과 <span style="font-style:italic; color: var(--accent);">홈페이지</span></span>
-        </div>
-        <div class="lc-desc" style="font-family: Pretendard; line-height: 2">교육과정·교수진·입학정보까지<br/>학과의 모든 것.</div>
-        <div class="lc-url-block lc-url-block--simple">
-          <span class="lc-label" style="font-family: Pretendard">방문</span>
-          <span class="lc-url">interior.kit.ac.kr</span>
-        </div>
-      </a>
-
-      <!-- Card 3: Instagram -->
-      <a class="link-card" href="https://www.instagram.com/kit_interior_design/" target="_blank" rel="noopener">
-        <div class="lc-icon" aria-hidden="true">
-          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5">
-            <rect x="8" y="8" width="32" height="32" rx="8"/>
-            <circle cx="24" cy="24" r="8"/>
-            <circle cx="33" cy="15" r="1.8" fill="currentColor"/>
-          </svg>
-        </div>
-        <div class="lc-title">
-          <span class="lc-num" style="font-family: Pretendard">03</span>
-          <span class="lc-name">인스타<span style="font-style:italic; color: var(--accent);">그램</span></span>
-        </div>
-        <div class="lc-desc" style="font-family: Pretendard; line-height: 2">학과의 일상·작업과정·이벤트를<br/>가장 빠르게 만나는 곳.</div>
-        <div class="lc-url-block lc-url-block--simple">
-          <span class="lc-label" style="font-family: Pretendard">팔로우</span>
-          <span class="lc-url">@kit_interior_design</span>
-        </div>
-      </a>
-    </div>
-  </div>
-
-  <div class="footer">
-    <div style="font-family: Pretendard">End · 함께 만들어가요</div>
-    <div class="pageno">25</div>
   </div>
 </section>
 
@@ -2680,45 +2489,6 @@
   // bind chips immediately too (handles re-entry)
   setTimeout(bindQ, 200);
   setTimeout(bindQ, 1200);
-
-  // ---- slide 25 : QR for gallery ----
-  function renderGalleryQR(){
-    var el = document.getElementById('qr-gallery');
-    if(!el || el.dataset.rendered === '1') return;
-    if(typeof qrcode === 'undefined'){
-      // library not loaded yet, retry
-      setTimeout(renderGalleryQR, 200);
-      return;
-    }
-    try{
-      var qr = qrcode(0, 'M');
-      qr.addData('http://idgallery.net/');
-      qr.make();
-      // render as inline SVG so it scales crisply
-      el.innerHTML = qr.createSvgTag({
-        cellSize: 4,
-        margin: 0,
-        scalable: true
-      });
-      // strip width/height to allow CSS sizing
-      var svg = el.querySelector('svg');
-      if(svg){
-        svg.removeAttribute('width');
-        svg.removeAttribute('height');
-        svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
-      }
-      el.dataset.rendered = '1';
-    }catch(err){
-      console.warn('QR render failed', err);
-    }
-  }
-  renderGalleryQR();
-  // also render on slide change just in case
-  window.addEventListener('message', function(e){
-    if(e && e.data && typeof e.data === 'object' && e.data.slideIndexChanged === 24){
-      renderGalleryQR();
-    }
-  });
 })();
 </script>
 
