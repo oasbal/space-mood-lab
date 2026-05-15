@@ -1121,6 +1121,82 @@
     font-size:22px; color: var(--paper);
   }
 
+  /* shorts page (slide 18) */
+  .s-shorts{ background: var(--paper); }
+  .s-shorts .body{ position:absolute; left:96px; right:96px; top: 160px; bottom: 140px; display:flex; flex-direction:column; }
+  .s-shorts .head{ display:flex; justify-content:space-between; align-items: flex-start; margin-bottom: 32px; }
+  .s-shorts h2{
+    font-family: var(--serif); font-weight:300; font-size: 88px; line-height:1; letter-spacing:-0.02em;
+  }
+  .s-shorts h2 .em{ font-style:italic; color: var(--accent); }
+  .s-shorts .shorts-grid{
+    flex:1; min-height:0;
+    display:grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;
+    gap: 28px;
+  }
+  .s-shorts .short-card{
+    border: 1px solid var(--ink);
+    background: var(--paper);
+    display: flex; flex-direction: row;
+    text-decoration: none; color: var(--ink);
+    overflow: hidden;
+    transition: background .2s, transform .2s;
+    min-height: 0;
+  }
+  .s-shorts .short-card:hover{
+    background: var(--paper-2);
+    transform: translateY(-2px);
+  }
+  .s-shorts .sh-thumb{
+    flex: 0 0 44%;
+    position: relative;
+    background: var(--ink);
+    overflow: hidden;
+    border-right: 1px solid var(--ink);
+  }
+  .s-shorts .sh-thumb img{
+    position: absolute; inset: 0;
+    width: 100%; height: 100%; object-fit: cover; display: block;
+  }
+  .s-shorts .sh-play{
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.55);
+    color: var(--paper);
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(2px);
+  }
+  .s-shorts .sh-play svg{ width: 28px; height: 28px; margin-left: 3px; }
+  .s-shorts .short-card:hover .sh-play{ background: var(--accent); }
+  .s-shorts .sh-badge{
+    position: absolute; top: 14px; left: 14px;
+    background: #ff0033; color: #fff;
+    font-size: 10px; letter-spacing: 0.16em;
+    padding: 4px 8px;
+  }
+  .s-shorts .sh-body{
+    flex: 1; min-width: 0;
+    padding: 28px 30px;
+    display: flex; flex-direction: column;
+    gap: 12px;
+  }
+  .s-shorts .sh-num{
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.18em; color: var(--muted);
+  }
+  .s-shorts .sh-title{
+    font-family: var(--serif); font-weight: 300; font-size: 30px; line-height: 1.2;
+    margin-top: 4px;
+  }
+  .s-shorts .sh-tag{
+    margin-top: auto;
+    font-size: 14px; letter-spacing: 0.04em;
+    color: var(--ink-2);
+    border-top: 1px solid var(--line);
+    padding-top: 14px;
+  }
+
   /* links page */
   .s-links{ background: var(--paper); }
   .s-links .body{ position:absolute; left:96px; right:96px; top: 200px; bottom: 160px; display:flex; flex-direction:column; }
@@ -1753,7 +1829,7 @@
 
   <div class="footer">
     <div style="font-family: Pretendard">Part 3 · 핵심 명제</div>
-    <div class="pageno">13 — 18</div>
+    <div class="pageno">13 — 19</div>
   </div>
 </section>
 
@@ -2004,7 +2080,98 @@
 </section>
 
 <!-- ===================================================================== -->
-<!-- 17 / HANDOFF -->
+<!-- 18 / YOUTUBE SHORTS — AI IN PRACTICE -->
+<!-- ===================================================================== -->
+<section class="s-shorts">
+  <div class="frame"></div>
+  <div class="meta">
+    <div class="l" style="font-family: Pretendard"><span class="dot"></span>Part 3 / In Practice</div>
+    <div class="r" style="font-family: Pretendard">REAL DESIGNERS · REAL WORKFLOW</div>
+  </div>
+
+  <div class="body">
+    <div class="head">
+      <div>
+        <div class="kicker" data-anim="up" style="font-family: Pretendard; --anim-delay: 200ms;"><span class="num">03 · 4</span>현장의 디자이너들은 이미</div>
+        <h2 data-anim="up" style="margin-top:24px; --anim-delay: 400ms;">AI는 이미 <span class="em">현장에서.</span></h2>
+      </div>
+      <div class="hint" data-anim="fade" style="--anim-delay: 700ms; font-family: Pretendard; font-size: 13px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-2); text-align: right">
+        클릭하여 영상 보기 →<br/>
+        <span style="font-style: italic; font-family: var(--serif); text-transform: none; letter-spacing: 0; font-size: 16px; color: var(--muted);">출처 · YouTube 채널 '뽁숑이'</span>
+      </div>
+    </div>
+
+    <div class="shorts-grid">
+      <a class="short-card" href="https://www.youtube.com/shorts/yVD8auU-sDE" target="_blank" rel="noopener" data-anim="up" style="--anim-delay: 900ms;">
+        <div class="sh-thumb">
+          <img src="https://img.youtube.com/vi/yVD8auU-sDE/hqdefault.jpg" alt="이 공간 하나로, 제안 연출이 늘어납니다">
+          <div class="sh-play" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          </div>
+          <div class="sh-badge" style="font-family: Pretendard">SHORTS</div>
+        </div>
+        <div class="sh-body">
+          <div class="sh-num" style="font-family: Pretendard">CASE · 01</div>
+          <div class="sh-title">한 공간으로,<br/><span style="font-style: italic; color: var(--accent);">여러 연출</span>을 만든다</div>
+          <div class="sh-tag" style="font-family: Pretendard">나노바나나 · 믹스보드 · 스케치업</div>
+        </div>
+      </a>
+
+      <a class="short-card" href="https://www.youtube.com/shorts/U50ahgCvE38" target="_blank" rel="noopener" data-anim="up" style="--anim-delay: 1050ms;">
+        <div class="sh-thumb">
+          <img src="https://img.youtube.com/vi/U50ahgCvE38/hqdefault.jpg" alt="현장에서 바로 실사 시안 완성">
+          <div class="sh-play" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          </div>
+          <div class="sh-badge" style="font-family: Pretendard">SHORTS</div>
+        </div>
+        <div class="sh-body">
+          <div class="sh-num" style="font-family: Pretendard">CASE · 02</div>
+          <div class="sh-title">현장에서 바로,<br/><span style="font-style: italic; color: var(--accent);">실사 시안</span> 완성</div>
+          <div class="sh-tag" style="font-family: Pretendard">아이패드 스캔 → AI 렌더</div>
+        </div>
+      </a>
+
+      <a class="short-card" href="https://www.youtube.com/shorts/Ijqy_Oj3zCI" target="_blank" rel="noopener" data-anim="up" style="--anim-delay: 1200ms;">
+        <div class="sh-thumb">
+          <img src="https://img.youtube.com/vi/Ijqy_Oj3zCI/hqdefault.jpg" alt="CANVA 템플릿과 나노바나나로 인테리어 영상">
+          <div class="sh-play" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          </div>
+          <div class="sh-badge" style="font-family: Pretendard">SHORTS</div>
+        </div>
+        <div class="sh-body">
+          <div class="sh-num" style="font-family: Pretendard">CASE · 03</div>
+          <div class="sh-title">이미지를 넘어,<br/><span style="font-style: italic; color: var(--accent);">영상</span>까지 만든다</div>
+          <div class="sh-tag" style="font-family: Pretendard">CANVA · 나노바나나 · 스케치업</div>
+        </div>
+      </a>
+
+      <a class="short-card" href="https://www.youtube.com/shorts/ypoInDZW7kI" target="_blank" rel="noopener" data-anim="up" style="--anim-delay: 1350ms;">
+        <div class="sh-thumb">
+          <img src="https://img.youtube.com/vi/ypoInDZW7kI/hqdefault.jpg" alt="실측영상 → 도면 → 3D 워크플로우">
+          <div class="sh-play" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          </div>
+          <div class="sh-badge" style="font-family: Pretendard">SHORTS</div>
+        </div>
+        <div class="sh-body">
+          <div class="sh-num" style="font-family: Pretendard">CASE · 04</div>
+          <div class="sh-title">실측 영상에서<br/><span style="font-style: italic; color: var(--accent);">3D</span>까지, 한 흐름</div>
+          <div class="sh-tag" style="font-family: Pretendard">실측 → 도면 → 3D 자동화</div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div style="font-family: Pretendard">Part 3 · 현장 사례</div>
+    <div class="pageno">18</div>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- 19 / HANDOFF -->
 <!-- ===================================================================== -->
 <section class="s-handoff">
   <div class="frame"></div>
@@ -2045,7 +2212,7 @@
 
   <div class="footer">
     <div style="font-family: Pretendard">End of Part 3 · 도입 강의 종료</div>
-    <div class="pageno">18</div>
+    <div class="pageno">19</div>
   </div>
 </section>
 
@@ -2071,7 +2238,7 @@
 
   <div class="footer">
     <div style="font-family: Pretendard">경남정보대학교 / 인테리어디자인과</div>
-    <div class="pageno">19</div>
+    <div class="pageno">20</div>
   </div>
 </section>
 
@@ -2116,7 +2283,7 @@
 
   <div class="footer">
     <div style="font-family: Pretendard">Part 4 · 교육 패러다임 전환</div>
-    <div class="pageno">20</div>
+    <div class="pageno">21</div>
   </div>
 </section>
 
@@ -2183,7 +2350,7 @@
 
   <div class="footer">
     <div style="font-family: Pretendard">Part 4 · 핵심역량</div>
-    <div class="pageno">21</div>
+    <div class="pageno">22</div>
   </div>
 </section>
 
@@ -2303,7 +2470,7 @@
 
   <div class="footer">
     <div style="font-family: Pretendard">Part 4 · 교육 철학</div>
-    <div class="pageno">22</div>
+    <div class="pageno">23</div>
   </div>
 </section>
 
@@ -2376,7 +2543,7 @@
 
   <div class="footer">
     <div style="font-family: Pretendard">Part 4 · 성장 로드맵</div>
-    <div class="pageno">23</div>
+    <div class="pageno">24</div>
   </div>
 </section>
 
@@ -2416,7 +2583,7 @@
 
   <div class="footer">
     <div style="font-family: Pretendard">AI 공간 디렉터 · 단어가 공간을 만든다</div>
-    <div class="pageno" style="color: var(--paper);">24</div>
+    <div class="pageno" style="color: var(--paper);">25</div>
   </div>
 </section>
 
@@ -2496,7 +2663,7 @@
 
   <div class="footer">
     <div style="font-family: Pretendard">End · 함께 만들어가요</div>
-    <div class="pageno">25</div>
+    <div class="pageno">26</div>
   </div>
 </section>
 
@@ -2645,8 +2812,8 @@
       if(e.data.slideIndexChanged === 13){
         animateFlow();
       }
-      // slide 16 (recap) is index 15 — refresh student callback
-      if(e.data.slideIndexChanged === 15){
+      // slide 17 (recap) is index 16 — refresh student callback
+      if(e.data.slideIndexChanged === 16){
         renderStudentCallback();
       }
     }
@@ -2680,6 +2847,22 @@
   // bind chips immediately too (handles re-entry)
   setTimeout(bindQ, 200);
   setTimeout(bindQ, 1200);
+
+  // ---- robust external link opening (escape sandboxed preview iframes) ----
+  document.addEventListener('click', function(e){
+    var a = e.target && e.target.closest && e.target.closest('a[target="_blank"]');
+    if(!a) return;
+    var href = a.getAttribute('href');
+    if(!href || href.indexOf('http') !== 0) return;
+    // attempt to open in top-level window; falls back to normal anchor behavior if blocked
+    try{
+      var top = window.top || window.parent || window;
+      top.open(href, '_blank', 'noopener,noreferrer');
+      e.preventDefault();
+    }catch(err){
+      // let the anchor's default behavior run
+    }
+  });
 
   // ---- slide 25 : QR for gallery ----
   function renderGalleryQR(){
@@ -2715,7 +2898,7 @@
   renderGalleryQR();
   // also render on slide change just in case
   window.addEventListener('message', function(e){
-    if(e && e.data && typeof e.data === 'object' && e.data.slideIndexChanged === 24){
+    if(e && e.data && typeof e.data === 'object' && e.data.slideIndexChanged === 25){
       renderGalleryQR();
     }
   });
